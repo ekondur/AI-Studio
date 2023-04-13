@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<Extern href="stdidcmd.h"/>
+	<Extern href="vsshlids.h"/>
+	<Include href="KnownImageIds.vsct"/>
+	<Include href="VSGlobals.vsct"/>
+
+	<Commands package="AI_Studio">
+
+		<Groups>
+			<Group guid="AI_Studio" id="AI_MenuGroup" />
+			<Group guid="AI_Studio" id="AI_CommandGroup" />
+		</Groups>
+
+		<Menus>
+			<Menu guid="AI_Studio" id="AI_Menu" type="Menu">
+				<Strings>
+					<ButtonText>AI Studio</ButtonText>
+				</Strings>
+			</Menu>
+		</Menus>
+
+		<Buttons>
+			<Button guid="AI_Studio" id="AddUnitTests" priority="0x0000" type="Button">
+				<Strings>
+					<ButtonText>Add Unit Tests</ButtonText>
+					<LocCanonicalName>.AI_Studio.AddUnitTests</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="AI_Studio" id="AddSummary" priority="0x0001" type="Button">
+				<Strings>
+					<ButtonText>Add Summary</ButtonText>
+					<LocCanonicalName>.AI_Studio.AddSummary</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="AI_Studio" id="AddComments" priority="0x0002" type="Button">
+				<Strings>
+					<ButtonText>Add Comments</ButtonText>
+					<LocCanonicalName>.AI_Studio.AddDescription</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="AI_Studio" id="Refactor" priority="0x0003" type="Button">
+				<Strings>
+					<ButtonText>Refactor</ButtonText>
+					<LocCanonicalName>.AI_Studio.Refactor</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="AI_Studio" id="Explain" priority="0x0004" type="Button">
+				<Strings>
+					<ButtonText>Explain</ButtonText>
+					<LocCanonicalName>.AI_Studio.Explain</LocCanonicalName>
+				</Strings>
+			</Button>
+		</Buttons>
+
+	</Commands>
+
+	<CommandPlacements>
+		<CommandPlacement guid="AI_Studio" id="AI_MenuGroup" priority="0x0100">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="AI_Menu" priority="0x0100">
+			<Parent guid="AI_Studio" id="AI_MenuGroup"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="AI_CommandGroup" priority="0x0100">
+			<Parent guid="AI_Studio" id="AI_Menu"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="AddUnitTests" priority="0x0000">
+			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="AddSummary" priority="0x0001" >
+			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="AddComments" priority="0x0002" >
+			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="Refactor" priority="0x0003" >
+			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="Explain" priority="0x0004" >
+			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		</CommandPlacement>
+	</CommandPlacements>
+
+	<Symbols>
+		<GuidSymbol name="AI_Studio" value="{2dd7016f-e0cf-41b5-bc1a-ca24bd6b9662}">
+			<IDSymbol name="AI_MenuGroup" value="0x1000" />
+			<IDSymbol name="AI_CommandGroup" value="0x1001" />
+			<IDSymbol name="AI_Menu" value="0x1002" />
+			<IDSymbol name="AddUnitTests" value="0x0000" />
+			<IDSymbol name="AddSummary" value="0x0001" />
+			<IDSymbol name="AddComments" value="0x0002" />
+			<IDSymbol name="Refactor" value="0x0003" />
+			<IDSymbol name="Explain" value="0x0004" />
+		</GuidSymbol>
+	</Symbols>
+
+</CommandTable>
