@@ -6,7 +6,7 @@ namespace AI_Studio
     {
         [Description("According to this URL https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest, use MSTest as main framework")]
         MSTest,
-        [Description("According to this URL https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit, use xUnit as main framework")]
+        [Description("According to this URL https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test, use xUnit as main framework")]
         xUnit,
         [Description("According to this URL https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit, use NUnit as main framework")]
         NUnit

@@ -27,5 +27,18 @@ namespace AI_Studio
         [TypeConverter(typeof(EnumConverter))]
         public IsolationFramework IsolationFramework { get; set; } = IsolationFramework.None;
 
+        [Category("Unit Test Settings")]
+        [DisplayName("Test/Dummy Data Framework")]
+        [Description("Test Data Builders and Dummy Data Generators.")]
+        [DefaultValue(TestDataFramework.None)]
+        [TypeConverter(typeof(EnumConverter))]
+        public TestDataFramework TestDataFramework { get; set; } = TestDataFramework.None;
+
+        [Category("Unit Test Settings")]
+        [DisplayName("Fluent Assertions Framework")]
+        [Description("Fluent assertions frameworks is a set of .NET extension methods that allow you to more naturally specify the expected outcome of a TDD or BDD-style unit test.")]
+        [DefaultValue(FluentAssertionFramework.None)]
+        [TypeConverter(typeof(EnumConverter))]
+        public FluentAssertionFramework FluentAssertionFramework { get; set; } = FluentAssertionFramework.None;
     }
 }

@@ -92,6 +92,8 @@ namespace AI_Studio
                 case "AddUnitTests":
                     inputs.Add(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
                     inputs.Add(unitTestsOptions.IsolationFramework.GetEnumDescription());
+                    inputs.Add(unitTestsOptions.TestDataFramework.GetEnumDescription());
+                    inputs.Add(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
                     break;
             }
 

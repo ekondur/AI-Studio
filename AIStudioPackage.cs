@@ -12,7 +12,7 @@ namespace AI_Studio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PackageGuids.AI_StudioString)]
     [ProvideOptionPage(typeof(OptionsProvider.GeneralOptions), "AI Studio", "General", 0, 0, true, SupportsProfiles = true)]
-    [ProvideOptionPage(typeof(OptionsProvider.UnitTestsOptions), "AI Studio", "UnitTests", 1, 1, true, SupportsProfiles = true)]
+    [ProvideOptionPage(typeof(OptionsProvider.UnitTestsOptions), "AI Studio", "Unit Test", 1, 1, true, SupportsProfiles = true)]
     [ProvideOptionPage(typeof(OptionsProvider.CommandsOptions), "AI Studio", "Commands", 2, 2, true, SupportsProfiles = true)]
     public sealed class AIStudioPackage : ToolkitPackage
     {

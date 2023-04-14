@@ -50,7 +50,9 @@
     <Compile Include="Commands\AddComments.cs" />
     <Compile Include="Commands\Explain.cs" />
     <Compile Include="Commands\Refactor.cs" />
+    <Compile Include="Enums\FluentAssertionFramework.cs" />
     <Compile Include="Enums\IsolationFramework.cs" />
+    <Compile Include="Enums\TestDataFramework.cs" />
     <Compile Include="Enums\UnitTestingFramework.cs" />
     <Compile Include="Helpers\EnumHelpers.cs" />
     <Compile Include="Options\Commands.cs" />
