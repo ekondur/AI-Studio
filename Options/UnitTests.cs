@@ -40,5 +40,10 @@ namespace AI_Studio
         [DefaultValue(FluentAssertionFramework.None)]
         [TypeConverter(typeof(EnumConverter))]
         public FluentAssertionFramework FluentAssertionFramework { get; set; } = FluentAssertionFramework.None;
+
+        [Category("Unit Test Settings")]
+        [DisplayName("Others")]
+        [Description("Add any other details.")]
+        public string Others { get; set; }
     }
 }

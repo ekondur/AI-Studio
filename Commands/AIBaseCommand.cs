@@ -1,7 +1,7 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using OpenAI_API;
-using System.Collections.Generic;
+using OpenAI_API.Chat;
 using System.Linq;
 
 namespace AI_Studio
@@ -41,12 +41,7 @@ namespace AI_Studio
 
             var commandsOptions = await Commands.GetLiveInstanceAsync();
             var unitTestsOptions = await UnitTests.GetLiveInstanceAsync();
-            var userInputs = GetUserInputs(commandsOptions, unitTestsOptions);
-
-            foreach (var userInput in userInputs)
-            {
-                chat.AppendUserInput(userInput);
-            }
+            AddSettingsInputs(chat, commandsOptions, unitTestsOptions);
 
             string response = await chat.GetResponseFromChatbotAsync();
 
@@ -56,7 +51,7 @@ namespace AI_Studio
             {
                 await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
             }
-            else if (typeof(T).Name == "AddUnitTests")
+            else if (typeof(T).Name == "AddUnitTests" || typeof(T).Name == "CodeIt")
             {
                 docView.TextBuffer.Insert(selection.End, response);
             }
@@ -71,33 +66,36 @@ namespace AI_Studio
             }
         }
 
-        private IEnumerable<string> GetUserInputs(Commands commandsOptions, UnitTests unitTestsOptions)
+        private void AddSettingsInputs(Conversation chat, Commands commandsOptions, UnitTests unitTestsOptions)
         {
-            var inputs = new List<string>();
-
             switch (typeof(T).Name)
             {
                 case "AddSummary":
-                    inputs.Add(commandsOptions.AddSummary);
+                    chat.AppendUserInput(commandsOptions.AddSummary);
                     break;
                 case "AddComments":
-                    inputs.Add(commandsOptions.AddComments);
+                    chat.AppendUserInput(commandsOptions.AddComments);
                     break;
                 case "Refactor":
-                    inputs.Add(commandsOptions.Refactor);
+                    chat.AppendUserInput(commandsOptions.Refactor);
                     break;
                 case "Explain":
-                    inputs.Add(commandsOptions.Explain);
+                    chat.AppendUserInput(commandsOptions.Explain);
+                    break;
+                case "CodeIt":
+                    chat.AppendUserInput(commandsOptions.CodeIt);
                     break;
                 case "AddUnitTests":
-                    inputs.Add(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
-                    inputs.Add(unitTestsOptions.IsolationFramework.GetEnumDescription());
-                    inputs.Add(unitTestsOptions.TestDataFramework.GetEnumDescription());
-                    inputs.Add(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
+                    chat.AppendUserInput(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
+                    chat.AppendUserInput(unitTestsOptions.IsolationFramework.GetEnumDescription());
+                    chat.AppendUserInput(unitTestsOptions.TestDataFramework.GetEnumDescription());
+                    chat.AppendUserInput(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
+                    if (!string.IsNullOrEmpty(unitTestsOptions.Others))
+                    {
+                        chat.AppendUserInput(unitTestsOptions.Others);
+                    }
                     break;
             }
-
-            return inputs;
         }
     }
 }

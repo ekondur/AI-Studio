@@ -52,6 +52,12 @@
 					<LocCanonicalName>.AI_Studio.Explain</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="AI_Studio" id="CodeIt" priority="0x0005" type="Button">
+				<Strings>
+					<ButtonText>Code It</ButtonText>
+					<LocCanonicalName>.AI_Studio.CodeIt</LocCanonicalName>
+				</Strings>
+			</Button>
 		</Buttons>
 
 	</Commands>
@@ -81,6 +87,9 @@
 		<CommandPlacement guid="AI_Studio" id="Explain" priority="0x0004" >
 			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
 		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="CodeIt" priority="0x0005" >
+			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		</CommandPlacement>
 	</CommandPlacements>
 
 	<Symbols>
@@ -93,6 +102,7 @@
 			<IDSymbol name="AddComments" value="0x0002" />
 			<IDSymbol name="Refactor" value="0x0003" />
 			<IDSymbol name="Explain" value="0x0004" />
+			<IDSymbol name="CodeIt" value="0x0005" />
 		</GuidSymbol>
 	</Symbols>
 
