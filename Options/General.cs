@@ -22,6 +22,6 @@ namespace AI_Studio
         [DisplayName("Format Document")]
         [Description("Format current document after change.")]
         [DefaultValue(true)]
-        public bool FormatDocument { get; set; }
+        public bool FormatDocument { get; set; } = true;
     }
 }

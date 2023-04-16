@@ -71,19 +71,34 @@ namespace AI_Studio
             switch (typeof(T).Name)
             {
                 case "AddSummary":
-                    chat.AppendUserInput(commandsOptions.AddSummary);
+                    if (!string.IsNullOrEmpty(commandsOptions.AddSummary))
+                    {
+                        chat.AppendUserInput(commandsOptions.AddSummary);
+                    }
                     break;
                 case "AddComments":
-                    chat.AppendUserInput(commandsOptions.AddComments);
+                    if (!string.IsNullOrEmpty(commandsOptions.AddComments))
+                    {
+                        chat.AppendUserInput(commandsOptions.AddComments);
+                    }
                     break;
                 case "Refactor":
-                    chat.AppendUserInput(commandsOptions.Refactor);
+                    if (!string.IsNullOrEmpty(commandsOptions.Refactor))
+                    {
+                        chat.AppendUserInput(commandsOptions.Refactor);
+                    }
                     break;
                 case "Explain":
-                    chat.AppendUserInput(commandsOptions.Explain);
+                    if (!string.IsNullOrEmpty(commandsOptions.Explain))
+                    {
+                        chat.AppendUserInput(commandsOptions.Explain);
+                    }
                     break;
                 case "CodeIt":
-                    chat.AppendUserInput(commandsOptions.CodeIt);
+                    if (!string.IsNullOrEmpty(commandsOptions.CodeIt))
+                    {
+                        chat.AppendUserInput(commandsOptions.CodeIt);
+                    }
                     break;
                 case "AddUnitTests":
                     chat.AppendExampleChatbotOutput(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
