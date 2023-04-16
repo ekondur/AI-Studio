@@ -90,9 +90,9 @@ namespace AI_Studio
                     chat.AppendExampleChatbotOutput(unitTestsOptions.IsolationFramework.GetEnumDescription());
                     chat.AppendExampleChatbotOutput(unitTestsOptions.TestDataFramework.GetEnumDescription());
                     chat.AppendExampleChatbotOutput(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
-                    if (!string.IsNullOrEmpty(unitTestsOptions.Others))
+                    if (!string.IsNullOrEmpty(unitTestsOptions.Customize))
                     {
-                        chat.AppendUserInput(unitTestsOptions.Others);
+                        chat.AppendUserInput(unitTestsOptions.Customize);
                     }
                     break;
             }

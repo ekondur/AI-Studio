@@ -42,8 +42,8 @@ namespace AI_Studio
         public FluentAssertionFramework FluentAssertionFramework { get; set; } = FluentAssertionFramework.None;
 
         [Category("Unit Test Settings")]
-        [DisplayName("Others")]
-        [Description("Add any other details.")]
-        public string Others { get; set; }
+        [DisplayName("Customize")]
+        [Description("Add any other details to customize unit tests.")]
+        public string Customize { get; set; }
     }
 }
