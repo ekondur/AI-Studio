@@ -86,10 +86,10 @@ namespace AI_Studio
                     chat.AppendUserInput(commandsOptions.CodeIt);
                     break;
                 case "AddUnitTests":
-                    chat.AppendUserInput(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
-                    chat.AppendUserInput(unitTestsOptions.IsolationFramework.GetEnumDescription());
-                    chat.AppendUserInput(unitTestsOptions.TestDataFramework.GetEnumDescription());
-                    chat.AppendUserInput(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
+                    chat.AppendExampleChatbotOutput(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
+                    chat.AppendExampleChatbotOutput(unitTestsOptions.IsolationFramework.GetEnumDescription());
+                    chat.AppendExampleChatbotOutput(unitTestsOptions.TestDataFramework.GetEnumDescription());
+                    chat.AppendExampleChatbotOutput(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
                     if (!string.IsNullOrEmpty(unitTestsOptions.Others))
                     {
                         chat.AppendUserInput(unitTestsOptions.Others);

@@ -23,36 +23,48 @@
 
 		<Buttons>
 			<Button guid="AI_Studio" id="AddUnitTests" priority="0x0000" type="Button">
+					  <Icon guid="ImageCatalogGuid" id="AddTest" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Add Unit Tests</ButtonText>
 					<LocCanonicalName>.AI_Studio.AddUnitTests</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="AI_Studio" id="AddSummary" priority="0x0001" type="Button">
+				<Icon guid="ImageCatalogGuid" id="AddDictionary" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Add Summary</ButtonText>
 					<LocCanonicalName>.AI_Studio.AddSummary</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="AI_Studio" id="AddComments" priority="0x0002" type="Button">
+				<Icon guid="ImageCatalogGuid" id="AddComment" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Add Comments</ButtonText>
-					<LocCanonicalName>.AI_Studio.AddDescription</LocCanonicalName>
+					<LocCanonicalName>.AI_Studio.AddComments</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="AI_Studio" id="Refactor" priority="0x0003" type="Button">
+				<Icon guid="ImageCatalogGuid" id="Refactoring" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Refactor</ButtonText>
 					<LocCanonicalName>.AI_Studio.Refactor</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="AI_Studio" id="Explain" priority="0x0004" type="Button">
+				<Icon guid="ImageCatalogGuid" id="DescriptionViewer" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Explain</ButtonText>
 					<LocCanonicalName>.AI_Studio.Explain</LocCanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="AI_Studio" id="CodeIt" priority="0x0005" type="Button">
+				<Icon guid="ImageCatalogGuid" id="CodeDefinitionWindow" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Code It</ButtonText>
 					<LocCanonicalName>.AI_Studio.CodeIt</LocCanonicalName>
