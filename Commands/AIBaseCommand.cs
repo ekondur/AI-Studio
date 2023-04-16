@@ -43,21 +43,30 @@ namespace AI_Studio
             var unitTestsOptions = await UnitTests.GetLiveInstanceAsync();
             AddSettingsInputs(chat, commandsOptions, unitTestsOptions);
 
-            string response = await chat.GetResponseFromChatbotAsync();
+            try
+            {
+                string response = await chat.GetResponseFromChatbotAsync();
 
-            twd.EndWaitDialog();
+                twd.EndWaitDialog();
 
-            if (typeof(T).Name == "Explain")
-            {
-                await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                if (typeof(T).Name == "Explain")
+                {
+                    await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                }
+                else if (typeof(T).Name == "AddUnitTests" || typeof(T).Name == "CodeIt")
+                {
+                    docView.TextBuffer.Insert(selection.End, response);
+                }
+                else
+                {
+                    docView.TextBuffer.Replace(selection, response);
+                }
+
             }
-            else if (typeof(T).Name == "AddUnitTests" || typeof(T).Name == "CodeIt")
+            catch (Exception ex)
             {
-                docView.TextBuffer.Insert(selection.End, response);
-            }
-            else
-            {
-                docView.TextBuffer.Replace(selection, response);
+                twd.EndWaitDialog();
+                await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
             }
 
             if (generalOptions.FormatDocument)
