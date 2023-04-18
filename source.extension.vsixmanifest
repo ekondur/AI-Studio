@@ -3,7 +3,7 @@
     <Metadata>
         <Identity Id="AI_Studio.8fa1980c-d304-499f-8faa-8f0623f4431b" Version="1.0" Language="en-US" Publisher="Emrah Kondur" />
         <DisplayName>AI Studio</DisplayName>
-        <Description xml:space="preserve">AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactor code, adding summary etc. while writing code.</Description>
+        <Description xml:space="preserve">AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactoring code, adding summary, etc. while writing code, just by right click on the code.</Description>
         <ReleaseNotes>The first release</ReleaseNotes>
         <Icon>Resources\Icon.png</Icon>
         <PreviewImage>Resources\Icon.png</PreviewImage>
