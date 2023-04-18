@@ -5,7 +5,7 @@
     {
         public CodeIt()
         {
-            SystemMessage = "Code it by use cases. Return only code, not explanations.";
+            SystemMessage = "Code it by use cases. Write only the code, not any explanations.";
         }
     }
 }

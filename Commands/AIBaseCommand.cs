@@ -55,7 +55,7 @@ namespace AI_Studio
                 }
                 else if (typeof(T).Name == "AddUnitTests" || typeof(T).Name == "CodeIt")
                 {
-                    docView.TextBuffer.Insert(selection.End, response);
+                    docView.TextBuffer.Insert(selection.End, Environment.NewLine + response);
                 }
                 else
                 {
