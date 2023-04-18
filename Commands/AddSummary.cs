@@ -5,7 +5,7 @@
     {
         public AddSummary()
         {
-            SystemMessage = "According to the this Url https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/recommended-tags, refactor the code adding summary. Write only the code, not any explanations.";
+            SystemMessage = "According to the this Url https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/recommended-tags, refactor the code adding summary. Write only the code, not the explanation.";
         }
     }
 }

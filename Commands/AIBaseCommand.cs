@@ -33,6 +33,12 @@ namespace AI_Studio
             var selection = docView.TextView.Selection.SelectedSpans.FirstOrDefault();
             var text = docView.TextView.Selection.StreamSelectionSpan.GetText();
 
+            if (string.IsNullOrEmpty(text))
+            {
+                twd.EndWaitDialog();
+                await VS.MessageBox.ShowAsync("Nothing Selected!", buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+            }
+
             var api = new OpenAIAPI(generalOptions.ApiKey);
             var chat = api.Chat.CreateConversation();
 

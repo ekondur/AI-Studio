@@ -5,7 +5,7 @@
     {
         public AddUnitTests()
         {
-            SystemMessage = "Create Unit Test methods with the user inputs. Write only the code, not any explanations.";
+            SystemMessage = "Create Unit Test methods with the user inputs. Write only the code, not the explanation.";
         }
     }
 }

@@ -5,7 +5,7 @@
     {
         public Refactor()
         {
-            SystemMessage = "Refactor this code with best practices. Write only the code, not any explanations.";
+            SystemMessage = "Refactor this code with best practices. Write only the code, not the explanation.";
         }
     }
 }
