@@ -51,6 +51,7 @@
     <Compile Include="Commands\Explain.cs" />
     <Compile Include="Commands\Refactor.cs" />
     <Compile Include="Commands\CodeIt.cs" />
+    <Compile Include="Commands\SecurityCheck.cs" />
     <Compile Include="Enums\FluentAssertionFramework.cs" />
     <Compile Include="Enums\IsolationFramework.cs" />
     <Compile Include="Enums\TestDataFramework.cs" />
