@@ -55,7 +55,7 @@ namespace AI_Studio
 
                 twd.EndWaitDialog();
 
-                if (typeof(T).Name == "Explain")
+                if (typeof(T).Name == "Explain" || typeof(T).Name == "SecurityCheck")
                 {
                     await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
                 }
@@ -113,6 +113,12 @@ namespace AI_Studio
                     if (!string.IsNullOrEmpty(commandsOptions.CodeIt))
                     {
                         chat.AppendUserInput(commandsOptions.CodeIt);
+                    }
+                    break;
+                case "SecurityCheck":
+                    if (!string.IsNullOrEmpty(commandsOptions.SecurityCheck))
+                    {
+                        chat.AppendUserInput(commandsOptions.SecurityCheck);
                     }
                     break;
                 case "AddUnitTests":

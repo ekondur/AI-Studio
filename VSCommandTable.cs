@@ -29,5 +29,6 @@ namespace AI_Studio
         public const int Refactor = 0x0003;
         public const int Explain = 0x0004;
         public const int CodeIt = 0x0005;
+        public const int SecurityCheck = 0x0006;
     }
 }
