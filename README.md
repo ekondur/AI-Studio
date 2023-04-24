@@ -87,3 +87,10 @@ You can also customize the unit tests on *Tools/Options/AI Studio/Unit Test*
   - [Shouldly](https://docs.shouldly.org/)
   - [NFluent](https://github.com/tpierrain/NFluent)
 - **Customize:** Add any other details to customize unit tests.
+
+### Security Check:
+Select the code line(s), right-click, and click "AI Studio / **Security Check**".
+
+Gives some information and suggestions:
+
+![image](https://user-images.githubusercontent.com/4971326/234108978-486678ec-b2c3-4258-8a3d-e1b9488b9fb3.png)
