@@ -1,7 +1,7 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using OpenAI_API;
-using OpenAI_API.Chat;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AI_Studio
@@ -9,6 +9,8 @@ namespace AI_Studio
     internal class AIBaseCommand<T> : BaseCommand<T> where T : class, new()
     {
         public string SystemMessage { get; set; }
+        public string UserInput { get; set; }
+        public List<string> AssistantInputs  { get; set; } = new List<string>();
 
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
@@ -44,10 +46,14 @@ namespace AI_Studio
 
             chat.AppendSystemMessage(SystemMessage);
             chat.AppendUserInput(text);
-
-            var commandsOptions = await Commands.GetLiveInstanceAsync();
-            var unitTestsOptions = await UnitTests.GetLiveInstanceAsync();
-            AddSettingsInputs(chat, commandsOptions, unitTestsOptions);
+            if (!string.IsNullOrEmpty(UserInput))
+            {
+                chat.AppendUserInput(UserInput);
+            }
+            foreach (var input in AssistantInputs)
+            {
+                chat.AppendExampleChatbotOutput(input);
+            }
 
             try
             {
@@ -78,59 +84,6 @@ namespace AI_Studio
             if (generalOptions.FormatDocument)
             {
                 (await VS.GetServiceAsync<DTE, DTE>()).ExecuteCommand("Edit.FormatDocument", string.Empty);
-            }
-        }
-
-        private void AddSettingsInputs(Conversation chat, Commands commandsOptions, UnitTests unitTestsOptions)
-        {
-            switch (typeof(T).Name)
-            {
-                case "AddSummary":
-                    if (!string.IsNullOrEmpty(commandsOptions.AddSummary))
-                    {
-                        chat.AppendUserInput(commandsOptions.AddSummary);
-                    }
-                    break;
-                case "AddComments":
-                    if (!string.IsNullOrEmpty(commandsOptions.AddComments))
-                    {
-                        chat.AppendUserInput(commandsOptions.AddComments);
-                    }
-                    break;
-                case "Refactor":
-                    if (!string.IsNullOrEmpty(commandsOptions.Refactor))
-                    {
-                        chat.AppendUserInput(commandsOptions.Refactor);
-                    }
-                    break;
-                case "Explain":
-                    if (!string.IsNullOrEmpty(commandsOptions.Explain))
-                    {
-                        chat.AppendUserInput(commandsOptions.Explain);
-                    }
-                    break;
-                case "CodeIt":
-                    if (!string.IsNullOrEmpty(commandsOptions.CodeIt))
-                    {
-                        chat.AppendUserInput(commandsOptions.CodeIt);
-                    }
-                    break;
-                case "SecurityCheck":
-                    if (!string.IsNullOrEmpty(commandsOptions.SecurityCheck))
-                    {
-                        chat.AppendUserInput(commandsOptions.SecurityCheck);
-                    }
-                    break;
-                case "AddUnitTests":
-                    chat.AppendExampleChatbotOutput(unitTestsOptions.UnitTestingFramework.GetEnumDescription());
-                    chat.AppendExampleChatbotOutput(unitTestsOptions.IsolationFramework.GetEnumDescription());
-                    chat.AppendExampleChatbotOutput(unitTestsOptions.TestDataFramework.GetEnumDescription());
-                    chat.AppendExampleChatbotOutput(unitTestsOptions.FluentAssertionFramework.GetEnumDescription());
-                    if (!string.IsNullOrEmpty(unitTestsOptions.Customize))
-                    {
-                        chat.AppendUserInput(unitTestsOptions.Customize);
-                    }
-                    break;
             }
         }
     }
