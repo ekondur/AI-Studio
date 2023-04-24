@@ -1,7 +1,7 @@
 # AI Studio
 > AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactoring code, adding summary, etc. while writing code, just by right click on the code.
 
-![image](https://user-images.githubusercontent.com/4971326/232881049-73adc4ff-c863-43c3-b6c7-172352fe2216.png)
+![image](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
 
 - First, you need to create an API key from the https://platform.openai.com/account/api-keys
 - Go to **Tools/Options/AI Studio** page and write the key in the General section
