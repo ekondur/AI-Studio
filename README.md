@@ -69,24 +69,21 @@ You can also customize the unit tests on *Tools/Options/AI Studio/Unit Test*
 ![image](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
 
 - **Unit Testing Framework:** Select unit testing framework to set up main functionalities.
-  - MSTest
-  - xUnit
-  - NUnit
+  - [MSTest](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest)
+  - [xUnit](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test)
+  - [NUnit](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit)
 - **Isolation Framework:** An isolation framework is a set of programmable APIs that makes creating fake objects much simpler, faster, and shorter than hand-coding them.
-  - None
-  - Moq
-  - FakeItEasy
-  - NSubstitute
+  - [Moq](https://github.com/Moq/moq4)
+  - [FakeItEasy](https://github.com/FakeItEasy/FakeItEasy)
+  - [NSubstitute](https://github.com/nsubstitute/NSubstitute)
 - **Test/Dummy Data Framework:** Test Data Builders and Dummy Data Generators.
-  - None
-  - AutoFixture
-  - Bogus
-  - GenFu
-  - NBuilder
-  - AutoBogus
+  - [AutoFixture](https://github.com/AutoFixture/AutoFixture)
+  - [Bogus](https://github.com/bchavez/Bogus)
+  - [GenFu](https://github.com/MisterJames/GenFu)
+  - [NBuilder](https://github.com/nbuilder/nbuilder)
+  - [AutoBogus](https://github.com/nickdodd79/AutoBogus)
 - **Fluent Assertions Framework:** Fluent assertions frameworks is a set of .NET extension methods that allow you to more naturally specify the expected outcome of a TDD or BDD-style unit test.
-  - None
-  - FluentAssertions
-  - Shouldly
-  - NFluent
+  - [FluentAssertions](https://fluentassertions.com/introduction)
+  - [Shouldly](https://docs.shouldly.org/)
+  - [NFluent](https://github.com/tpierrain/NFluent)
 - **Customize:** Add any other details to customize unit tests.
