@@ -73,7 +73,6 @@ namespace AI_Studio
                 {
                     docView.TextBuffer.Replace(selection, response);
                 }
-
             }
             catch (Exception ex)
             {
