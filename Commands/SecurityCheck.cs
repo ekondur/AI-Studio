@@ -6,6 +6,7 @@
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             SystemMessage = "Is the code secure, do you have any suggestions to make it safer?";
+            ResponseBehavior = ResponseBehavior.Message;
 
             var opts = await Commands.GetLiveInstanceAsync();
 

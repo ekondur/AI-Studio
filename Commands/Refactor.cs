@@ -8,6 +8,7 @@
             SystemMessage = "Refactor this code with best practices. Write only the code, not the explanation.";
 
             var opts = await Commands.GetLiveInstanceAsync();
+            ResponseBehavior = ResponseBehavior.Replace;
 
             UserInput = opts.Refactor;
 
