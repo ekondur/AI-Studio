@@ -6,6 +6,7 @@
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             SystemMessage = "Refactor this code just adding comments. Return only refactored code, not explanations.";
+            ResponseBehavior = ResponseBehavior.Replace;
 
             var opts = await Commands.GetLiveInstanceAsync();
 

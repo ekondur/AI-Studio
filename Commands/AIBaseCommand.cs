@@ -11,6 +11,7 @@ namespace AI_Studio
         public string SystemMessage { get; set; }
         public string UserInput { get; set; }
         public List<string> AssistantInputs  { get; set; } = new List<string>();
+        public ResponseBehavior ResponseBehavior { get; set; }
 
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
@@ -61,17 +62,17 @@ namespace AI_Studio
 
                 twd.EndWaitDialog();
 
-                if (typeof(T).Name == "Explain" || typeof(T).Name == "SecurityCheck")
+                switch (ResponseBehavior)
                 {
-                    await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
-                }
-                else if (typeof(T).Name == "AddUnitTests" || typeof(T).Name == "CodeIt")
-                {
-                    docView.TextBuffer.Insert(selection.End, Environment.NewLine + response);
-                }
-                else
-                {
-                    docView.TextBuffer.Replace(selection, response);
+                    case ResponseBehavior.Insert:
+                        docView.TextBuffer.Insert(selection.End, Environment.NewLine + response);
+                        break;
+                    case ResponseBehavior.Replace:
+                        docView.TextBuffer.Replace(selection, response);
+                        break;
+                    case ResponseBehavior.Message:
+                        await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -80,7 +81,7 @@ namespace AI_Studio
                 await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
             }
 
-            if (generalOptions.FormatDocument)
+            if (generalOptions.FormatDocument && ResponseBehavior != ResponseBehavior.Message)
             {
                 (await VS.GetServiceAsync<DTE, DTE>()).ExecuteCommand("Edit.FormatDocument", string.Empty);
             }

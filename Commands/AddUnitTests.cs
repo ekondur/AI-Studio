@@ -1,7 +1,4 @@
-﻿using static AI_Studio.OptionsProvider;
-using System;
-
-namespace AI_Studio
+﻿namespace AI_Studio
 {
     [Command(PackageIds.AddUnitTests)]
     internal sealed class AddUnitTests : AIBaseCommand<AddUnitTests>
@@ -9,6 +6,7 @@ namespace AI_Studio
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             SystemMessage = "Create Unit Test methods with the user inputs. Write only the code, not the explanation.";
+            ResponseBehavior = ResponseBehavior.Insert;
 
             var opts = await UnitTests.GetLiveInstanceAsync();
 

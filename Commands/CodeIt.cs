@@ -6,6 +6,7 @@
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             SystemMessage = "Code it by use cases. Write only the code, not the explanation.";
+            ResponseBehavior = ResponseBehavior.Insert;
 
             var opts = await Commands.GetLiveInstanceAsync();
 
