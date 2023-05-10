@@ -19,9 +19,15 @@ namespace AI_Studio
         public string ApiKey { get; set; }
 
         [Category("General")]
-        [DisplayName("Format Document")]
-        [Description("Format current document after change.")]
+        [DisplayName("Format Changed Text")]
+        [Description("Format text after change.")]
         [DefaultValue(true)]
-        public bool FormatDocument { get; set; } = true;
+        public bool FormatChangedText { get; set; } = true;
+
+        [Category("General")]
+        [DisplayName("Language Model")]
+        [Description("Chat language model")]
+        [DefaultValue(ChatLanguageModel.ChatGPTTurbo)]
+        public ChatLanguageModel LanguageModel { get; set; } = ChatLanguageModel.ChatGPTTurbo;
     }
 }

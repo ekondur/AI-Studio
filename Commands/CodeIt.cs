@@ -1,4 +1,6 @@
-﻿namespace AI_Studio
+﻿using System.Text.RegularExpressions;
+
+namespace AI_Studio
 {
     [Command(PackageIds.CodeIt)]
     internal sealed class CodeIt : AIBaseCommand<CodeIt>
@@ -11,6 +13,8 @@
             var opts = await Commands.GetLiveInstanceAsync();
 
             UserInput = opts.CodeIt;
+            _addContentTypePrefix = true;
+            _stripResponseMarkdownCode = true;
 
             await base.ExecuteAsync(e);
         }

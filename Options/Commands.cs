@@ -36,7 +36,7 @@ namespace AI_Studio
         [Category("Commands")]
         [DisplayName("Code It")]
         [Description("Add some suggestions here for Chat GPT to customize 'Code It' command.")]
-        public string CodeIt { get; set; }
+        public string CodeIt { get; set; } = "No explanation";
 
         [Category("Commands")]
         [DisplayName("Security Check")]
