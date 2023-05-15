@@ -1,4 +1,6 @@
-﻿namespace AI_Studio
+﻿using System.Text.RegularExpressions;
+
+namespace AI_Studio
 {
     [Command(PackageIds.Refactor)]
     internal sealed class Refactor : AIBaseCommand<Refactor>
@@ -11,6 +13,7 @@
             ResponseBehavior = ResponseBehavior.Replace;
 
             UserInput = opts.Refactor;
+            _stripResponseMarkdownCode = true;
 
             await base.ExecuteAsync(e);
         }

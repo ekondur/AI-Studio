@@ -1,4 +1,6 @@
-﻿namespace AI_Studio
+﻿using System.Text.RegularExpressions;
+
+namespace AI_Studio
 {
     [Command(PackageIds.AddComments)]
     internal sealed class AddComments : AIBaseCommand<AddComments>
@@ -11,6 +13,7 @@
             var opts = await Commands.GetLiveInstanceAsync();
 
             UserInput = opts.AddComments;
+            _stripResponseMarkdownCode = true;
 
             await base.ExecuteAsync(e);
         }
