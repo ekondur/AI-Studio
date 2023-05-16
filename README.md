@@ -6,12 +6,13 @@
 - First, you need to create an API key from the https://platform.openai.com/account/api-keys
 - Go to **Tools/Options/AI Studio** page and write the key in the General section
 
-![image](https://user-images.githubusercontent.com/4971326/232878716-92165bd8-f1b9-4b3e-ba59-237e1bfad1bc.png)
+![image](https://github.com/ekondur/AI-Studio/assets/4971326/896600b6-14c5-4e1a-aaf6-087b4ceb141c)
 
-- If you prefer refactoring the page after the change, keep **Format Document** as True.
+- If you prefer refactoring the code changes, keep **Format Changed Text** as True.
+- Choose a **Language Model** options: "ChatGPTTurbo", "GPT4" or "GPT4_32k_Context"
 
 ### Code It:
-Write a use case where you want to write the code, select the statement, right-click, and click "AI Studio / **Code It**".
+Write a use case where you want to write the code, select the statement (if it's a single line just click on the line), right-click, and click "AI Studio / **Code It**".
 
 ![image](https://user-images.githubusercontent.com/4971326/232882864-85547d6f-75ee-4d49-8684-a3b736b5da2e.png)
 
@@ -51,7 +52,7 @@ Shows a popup that includes explanations of the selected code:
 - AI studio is a flexible tool that allows you to customize all commands. Go to *Tools/Options/AI Studio/Commands*,
 - Write something to help chatGPT about the behaviors of the commands.
 
-![image](https://user-images.githubusercontent.com/4971326/232889800-d62af5ec-8c41-4fa2-a81e-a6ee84bdf61a.png)
+![image](https://github.com/ekondur/AI-Studio/assets/4971326/0b49f17d-fa00-40dd-a1d3-ff8aa7e43f2d)
 
 Then trigger the command again, and you will see the results affected by your comments:
 
