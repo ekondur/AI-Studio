@@ -2,6 +2,8 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400ac43e51b04f3fb2f335c1688b8d4b)](https://app.codacy.com/gh/ekondur/AI-Studio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 > AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactoring code, adding summary, etc. while writing code, just by right click on the code.
 
+[Get it from Visual Studio Market Place](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
+
 ![image](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
 
 - First, you need to create an API key from the https://platform.openai.com/account/api-keys
