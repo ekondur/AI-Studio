@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace AI_Studio
+﻿namespace AI_Studio
 {
     [Command(PackageIds.AddComments)]
     internal sealed class AddComments : AIBaseCommand<AddComments>
