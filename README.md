@@ -12,7 +12,7 @@
 ![image](https://github.com/ekondur/AI-Studio/assets/4971326/896600b6-14c5-4e1a-aaf6-087b4ceb141c)
 
 - If you prefer refactoring the code changes, keep **Format Changed Text** as True.
-- Choose a **Language Model** options: "ChatGPTTurbo", "GPT4" or "GPT4_32k_Context"
+- Choose a **Language Model** options: "ChatGPTTurbo", GPT4_Turbo, "GPT4" or "GPT4_32k_Context"
 
 ### Code It:
 Write a use case where you want to write the code, select the statement (if it's a single line just click on the line), right-click, and click "AI Studio / **Code It**".
