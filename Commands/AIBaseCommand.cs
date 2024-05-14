@@ -71,7 +71,7 @@ namespace AI_Studio
                     ChatLanguageModel.GPT4 => Model.GPT4,
                     ChatLanguageModel.GPT4_32k_Context => Model.GPT4_32k_Context,
                     ChatLanguageModel.GPT4_Turbo => Model.GPT4_Turbo,
-                    ChatLanguageModel.GPT4o => new Model("gpt-4o"),
+                    ChatLanguageModel.GPT4o => new Model("gpt-4o") { OwnedBy = "openai" },
                     _ => Model.ChatGPTTurbo
                 }
             };
