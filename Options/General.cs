@@ -29,5 +29,11 @@ namespace AI_Studio
         [Description("Chat language model")]
         [DefaultValue(ChatLanguageModel.ChatGPTTurbo)]
         public ChatLanguageModel LanguageModel { get; set; } = ChatLanguageModel.ChatGPTTurbo;
+
+        [Category("General")]
+        [DisplayName("API Endpoint")]
+        [Description("URL containing the OpenAI API endpoint and request format ({0}=version, {1}=request)")]
+        [DefaultValue("https://api.openai.com/{0}/{1}")]
+        public string ApiEndpoint { get; set; } = "https://api.openai.com/{0}/{1}";
     }
 }

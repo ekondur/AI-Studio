@@ -63,7 +63,12 @@ namespace AI_Studio
                 text = $"{docView.TextView.TextDataModel.ContentType.DisplayName}\n{text}";
             }
 
-            var api = new OpenAIAPI(generalOptions.ApiKey);
+            var api = new OpenAIAPI(generalOptions.ApiKey)
+            {
+                // Set endpoint from the settings
+                ApiUrlFormat = generalOptions.ApiEndpoint
+            };
+
             var chatRequestTemplate = new ChatRequest()
             {
                 Model = generalOptions.LanguageModel switch
