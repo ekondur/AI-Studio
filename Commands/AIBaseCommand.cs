@@ -26,7 +26,7 @@ namespace AI_Studio
 
             if (string.IsNullOrEmpty(generalOptions.ApiKey))
             {
-                await VS.MessageBox.ShowAsync("API Key is missing, go to Tools/Options/AI Stuido/General and add the API Key created from https://platform.openai.com/account/api-keys",
+                await VS.MessageBox.ShowAsync("API Key is missing, go to Tools/Options/AI Studio/General and add the API Key created from https://platform.openai.com/account/api-keys",
                     buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
 
                 Package.ShowOptionPage(typeof(General));
