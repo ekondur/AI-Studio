@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-	<Metadata>
-		<Identity Id="AI_Studio.74F4FED3-20F1-4F08-BEC5-1219C8EDC2AD" Version="1.4.0" Language="en-US" Publisher="Emrah Kondur" />
-		<DisplayName>AI Studio</DisplayName>
-		<Description xml:space="preserve">AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactoring code, adding summary, etc. while writing code, just by right click on the code.</Description>
-		<ReleaseNotes>Added option to set API endpoint  / URL format</ReleaseNotes>
-		<Icon>Resources\Icon.png</Icon>
-		<PreviewImage>Resources\Icon.png</PreviewImage>
-		<Tags>AI, chatGPT, UnitTest, Refactor, Summary, OpenAI</Tags>
-	</Metadata>
-	<Installation AllUsers="true">
-		<InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
-			<ProductArchitecture>amd64</ProductArchitecture>
-		</InstallationTarget>
-	</Installation>
-	<Prerequisites>
-		<Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
-	</Prerequisites>
-	<Assets>
-		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-	</Assets>
+    <Metadata>
+        <Identity Id="AI_Studio.74F4FED3-20F1-4F08-BEC5-1219C8EDC2AD" Version="1.4.1" Language="en-US" Publisher="Emrah Kondur" />
+        <DisplayName>AI Studio</DisplayName>
+        <Description xml:space="preserve">AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactoring code, adding summary, etc. while writing code, just by right click on the code.</Description>
+        <ReleaseNotes>Added option to set API endpoint  / URL format</ReleaseNotes>
+        <Icon>Resources\Icon.png</Icon>
+        <PreviewImage>Resources\Icon.png</PreviewImage>
+        <Tags>AI, chatGPT, UnitTest, Refactor, Summary, OpenAI</Tags>
+    </Metadata>
+    <Installation AllUsers="true">
+        <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
 </PackageManifest>

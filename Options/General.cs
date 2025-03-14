@@ -30,10 +30,23 @@ namespace AI_Studio
         [DefaultValue(ChatLanguageModel.ChatGPTTurbo)]
         public ChatLanguageModel LanguageModel { get; set; } = ChatLanguageModel.ChatGPTTurbo;
 
+        [Category("Custom Model")]
+        [DisplayName("Organization")]
+        [Description("Name of the organization or owner of the model.")]
+        [DefaultValue("organization_owner")]
+        public string OrganizationOwner { get; set; } = "";
+
+        [Category("Custom Model")]
+        [DisplayName("Custom Language Model ID")]
+        [Description("Provide the language model ID to use. (Example: deepseek-coder)")]
+        [DefaultValue("")]
+        public string CustomLanguageModel { get; set; } = "";
+
         [Category("General")]
         [DisplayName("API Endpoint")]
         [Description("URL containing the OpenAI API endpoint and request format ({0}=version, {1}=request)")]
         [DefaultValue("https://api.openai.com/{0}/{1}")]
         public string ApiEndpoint { get; set; } = "https://api.openai.com/{0}/{1}";
+
     }
 }
