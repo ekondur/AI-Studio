@@ -9,7 +9,7 @@
 - First, you need to create an API key from the https://platform.openai.com/account/api-keys
 - Go to **Tools/Options/AI Studio** page and write the key in the General section
 
-![image](https://github.com/ekondur/AI-Studio/assets/4971326/896600b6-14c5-4e1a-aaf6-087b4ceb141c)
+![image](https://github.com/user-attachments/assets/36623c4d-c99f-4f6c-a3c8-51a9445bdc11)
 
 - If you prefer refactoring the code changes, keep **Format Changed Text** as True.
 - Choose a **Language Model** options: "ChatGPTTurbo", GPT4_Turbo, "GPT4", "GPT4o" or "GPT4_32k_Context"
