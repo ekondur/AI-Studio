@@ -33,6 +33,14 @@ namespace AI_Studio
                 return;
             }
 
+            if (generalOptions.LanguageModel == ChatLanguageModel.Custom && String.IsNullOrEmpty(generalOptions.CustomLanguageModel))
+            {
+                await VS.MessageBox.ShowAsync("Please specify a custom language model ID while Language Model is set to \"Custom\"", $"Go to Tools/Options/AI Stuido/General and provide the language model ID provided from your endpoint at: {Environment.NewLine}{Environment.NewLine}{string.Format(generalOptions.ApiEndpoint,"v1", "models")}", buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+
+                Package.ShowOptionPage(typeof(General));
+                return;
+            }
+
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var fac = (IVsThreadedWaitDialogFactory)await VS.Services.GetThreadedWaitDialogAsync();
             IVsThreadedWaitDialog4 twd = fac.CreateInstance();
@@ -77,6 +85,7 @@ namespace AI_Studio
                     ChatLanguageModel.GPT4_32k_Context => Model.GPT4_32k_Context,
                     ChatLanguageModel.GPT4_Turbo => Model.GPT4_Turbo,
                     ChatLanguageModel.GPT4o => new Model("gpt-4o") { OwnedBy = "openai" },
+                    ChatLanguageModel.Custom => new Model(generalOptions.CustomLanguageModel) { OwnedBy = generalOptions.OrganizationOwner },
                     _ => Model.ChatGPTTurbo
                 }
             };
