@@ -26,7 +26,7 @@ namespace AI_Studio
 
             if (string.IsNullOrEmpty(generalOptions.ApiKey))
             {
-                await VS.MessageBox.ShowAsync("API Key is missing, go to Tools/Options/AI Stuido/General and add the API Key created from https://platform.openai.com/account/api-keys",
+                await VS.MessageBox.ShowAsync("API Key is missing, go to Tools/Options/AI Studio/General and add the API Key created from https://platform.openai.com/account/api-keys",
                     buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
 
                 Package.ShowOptionPage(typeof(General));
@@ -35,7 +35,7 @@ namespace AI_Studio
 
             if (generalOptions.LanguageModel == ChatLanguageModel.Custom && String.IsNullOrEmpty(generalOptions.CustomLanguageModel))
             {
-                await VS.MessageBox.ShowAsync("Please specify a custom language model ID while Language Model is set to \"Custom\"", $"Go to Tools/Options/AI Stuido/General and provide the language model ID provided from your endpoint at: {Environment.NewLine}{Environment.NewLine}{string.Format(generalOptions.ApiEndpoint,"v1", "models")}", buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                await VS.MessageBox.ShowAsync("Please specify a custom language model ID while Language Model is set to \"Custom\"", $"Go to Tools/Options/AI Studio/General and provide the language model ID provided from your endpoint at: {Environment.NewLine}{Environment.NewLine}{string.Format(generalOptions.ApiEndpoint,"v1", "models")}", buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
 
                 Package.ShowOptionPage(typeof(General));
                 return;
