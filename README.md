@@ -1,6 +1,6 @@
 # AI Studio
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400ac43e51b04f3fb2f335c1688b8d4b)](https://app.codacy.com/gh/ekondur/AI-Studio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-> AI Studio helps you with the power of chatGPT in many subjects such as adding unit tests, refactoring code, adding summary, etc. while writing code, just by right clicking on the code.
+> AI Studio helps you with the power of ChatGPT in many subjects, such as adding unit tests, refactoring code, adding a summary, etc., while writing code, just by right-clicking on the code.
 
 [Get it from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
 
@@ -13,9 +13,13 @@
 
 - If you prefer refactoring the code changes, keep **Format Changed Text** as True.
 - Choose a **Language Model** options: "ChatGPTTurbo", GPT4_Turbo, "GPT4", "GPT4o" or "GPT4_32k_Context"
+- You can choose a custom model like:
+
+![image](https://github.com/user-attachments/assets/c1b8c35a-9719-4ec5-9146-112d347fc522)
+
 
 ### Code It:
-Write a use case where you want to write the code, select the statement (if it's a single line just click on the line), right-click, and click "AI Studio / **Code It**".
+Write a use case where you want to write the code, select the statement (if it's a single line, just click on the line), right-click, and click "AI Studio / **Code It**".
 
 ![image](https://user-images.githubusercontent.com/4971326/232882864-85547d6f-75ee-4d49-8684-a3b736b5da2e.png)
 
@@ -49,7 +53,7 @@ Select the lines of code you want to explain, right-click, and click "AI Studio 
 
 Shows a popup that includes explanations of the selected code:
 
-![image](https://user-images.githubusercontent.com/4971326/232888457-c12651dd-abcf-48f1-a0a5-578aaacfff06.png)
+![image](https://github.com/user-attachments/assets/3c419429-2586-428d-a1ef-599803d137da)
 
 #### Customizable Commands
 - AI studio is a flexible tool that allows you to customize all commands. Go to *Tools/Options/AI Studio/Commands*,
@@ -66,7 +70,7 @@ Select the whole method, right-click, and click "AI Studio / **Add Unit Tests**"
 
 Prints the unit test(s) based on your choices:
 
-![image](https://user-images.githubusercontent.com/4971326/232892126-91f3c335-3633-4b4f-8c27-2da5b404e329.png)
+![image](https://github.com/user-attachments/assets/728816aa-228d-4b06-adbb-bd79e75ae633)
 
 You can also customize the unit tests on *Tools/Options/AI Studio/Unit Test*
 
@@ -97,4 +101,5 @@ Select the code line(s), right-click, and click "AI Studio / **Security Check**"
 
 Gives some information and suggestions:
 
-![image](https://user-images.githubusercontent.com/4971326/234108978-486678ec-b2c3-4258-8a3d-e1b9488b9fb3.png)
+![image](https://github.com/user-attachments/assets/37dbecc7-9894-49ed-a70c-efe3bb8d03a8)
+
