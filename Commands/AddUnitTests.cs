@@ -6,7 +6,7 @@
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             SystemMessage = "Create Unit Test methods with the user inputs. Write only the code, not the explanation.";
-            ResponseBehavior = ResponseBehavior.Insert;
+            ResponseBehavior = ResponseBehavior.Message;
 
             var opts = await UnitTests.GetLiveInstanceAsync();
 

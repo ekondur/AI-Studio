@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<Extern href="stdidcmd.h"/>
-	<Extern href="vsshlids.h"/>
-	<Include href="KnownImageIds.vsct"/>
-	<Include href="VSGlobals.vsct"/>
+	<Extern href="stdidcmd.h" />
+	<Extern href="vsshlids.h" />
+	<Include href="KnownImageIds.vsct" />
+	<Include href="VSGlobals.vsct" />
 
 	<Commands package="AI_Studio">
 
@@ -78,40 +78,50 @@
 					<LocCanonicalName>.AI_Studio.SecurityCheck</LocCanonicalName>
 				</Strings>
 			</Button>
-		</Buttons>
+		  <Button guid="guidAIStudioPackageCmdSet" id="cmdidOutputToolWindowCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>OutputToolWindow</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
 
-	</Commands>
+	  <Bitmaps>
+      <Bitmap guid="guidImages" href="Resources\OutputToolWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
+    </Bitmaps>
+  </Commands>
 
 	<CommandPlacements>
 		<CommandPlacement guid="AI_Studio" id="AI_MenuGroup" priority="0x0100">
-			<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
 		</CommandPlacement>
 		<CommandPlacement guid="AI_Studio" id="AI_Menu" priority="0x0100">
-			<Parent guid="AI_Studio" id="AI_MenuGroup"/>
+			<Parent guid="AI_Studio" id="AI_MenuGroup" />
 		</CommandPlacement>
 		<CommandPlacement guid="AI_Studio" id="AI_CommandGroup" priority="0x0100">
-			<Parent guid="AI_Studio" id="AI_Menu"/>
+			<Parent guid="AI_Studio" id="AI_Menu" />
 		</CommandPlacement>
 		<CommandPlacement guid="AI_Studio" id="AddUnitTests" priority="0x0000">
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
-		<CommandPlacement guid="AI_Studio" id="AddSummary" priority="0x0001" >
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		<CommandPlacement guid="AI_Studio" id="AddSummary" priority="0x0001">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
-		<CommandPlacement guid="AI_Studio" id="AddComments" priority="0x0002" >
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		<CommandPlacement guid="AI_Studio" id="AddComments" priority="0x0002">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
-		<CommandPlacement guid="AI_Studio" id="Refactor" priority="0x0003" >
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		<CommandPlacement guid="AI_Studio" id="Refactor" priority="0x0003">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
-		<CommandPlacement guid="AI_Studio" id="Explain" priority="0x0004" >
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		<CommandPlacement guid="AI_Studio" id="Explain" priority="0x0004">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
-		<CommandPlacement guid="AI_Studio" id="CodeIt" priority="0x0005" >
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		<CommandPlacement guid="AI_Studio" id="CodeIt" priority="0x0005">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
-		<CommandPlacement guid="AI_Studio" id="SecurityCheck" priority="0x0006" >
-			<Parent guid="AI_Studio" id="AI_CommandGroup"/>
+		<CommandPlacement guid="AI_Studio" id="SecurityCheck" priority="0x0006">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
 	</CommandPlacements>
 
@@ -128,6 +138,19 @@
 			<IDSymbol name="CodeIt" value="0x0005" />
 			<IDSymbol name="SecurityCheck" value="0x0006" />
 		</GuidSymbol>
-	</Symbols>
+	
+    <GuidSymbol value="{e9270b1a-7438-468b-a633-2d10046015b2}" name="guidAIStudioPackageCmdSet">
+      <IDSymbol value="256" name="cmdidOutputToolWindowCommand" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{9b2dec21-c485-4f86-b1c4-a70d00b44497}" name="guidImages">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
+    </GuidSymbol>
+  </Symbols>
 
 </CommandTable>

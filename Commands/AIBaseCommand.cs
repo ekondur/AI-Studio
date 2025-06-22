@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using OpenAI_API;
@@ -122,7 +123,9 @@ namespace AI_Studio
                         docView.TextBuffer.Replace(selection, response);
                         break;
                     case ResponseBehavior.Message:
-                        await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                        await ShowResponseInToolWindowAsync(response);
+                        // I wanna set here
+                        //await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
                         break;
                 }
             }
@@ -151,6 +154,31 @@ namespace AI_Studio
         {
             var regex = new Regex(@"```.*\r?\n?");
             return regex.Replace(response, "");
+        }
+
+        private async Task ShowResponseInToolWindowAsync(string response)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            // Create a cancellation token
+            var cancellationToken = VsShellUtilities.ShutdownToken;
+
+            // Get the tool window with the cancellation token
+            var toolWindow = await Package.FindToolWindowAsync(
+                typeof(OutputToolWindow),
+                0,
+                true,
+                cancellationToken);
+
+            // Show the tool window
+            var windowFrame = (IVsWindowFrame)toolWindow.Frame;
+            ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+            // Update the content
+            if (toolWindow is OutputToolWindow yourWindow)
+            {
+                await yourWindow.UpdateContentAsync(response);
+            }
         }
     }
 }
