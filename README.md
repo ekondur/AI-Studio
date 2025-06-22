@@ -1,105 +1,122 @@
 # AI Studio
+
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400ac43e51b04f3fb2f335c1688b8d4b)](https://app.codacy.com/gh/ekondur/AI-Studio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-> AI Studio helps you with the power of ChatGPT in many subjects, such as adding unit tests, refactoring code, adding a summary, etc., while writing code, just by right-clicking on the code.
+
+> AI Studio enhances your coding workflow with ChatGPT-powered features like unit test generation, code refactoring, documentation, and more - accessible via right-click context menu.
 
 [Get it from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
 
-![image](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
+![Extension Preview](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
 
-- First, you need to create an API key from the https://platform.openai.com/account/api-keys
-- Go to **Tools/Options/AI Studio** page and write the key in the General section
+## Getting Started
 
-![image](https://github.com/user-attachments/assets/36623c4d-c99f-4f6c-a3c8-51a9445bdc11)
+1. **Obtain API Key**: Create your API key at [OpenAI Platform](https://platform.openai.com/account/api-keys)
+2. **Configure Extension**: Navigate to **Tools/Options/AI Studio** and enter your key
+   
+   ![Settings Page](https://github.com/user-attachments/assets/36623c4d-c99f-4f6c-a3c8-51a9445bdc11)
 
-- If you prefer refactoring the code changes, keep **Format Changed Text** as True.
-- Choose a **Language Model** options: "ChatGPTTurbo", GPT4_Turbo, "GPT4", "GPT4o" or "GPT4_32k_Context"
-- You can choose a custom model like:
+### Configuration Options
+- **Format Changed Text**: Enable to automatically format refactored code
+- **Language Model**: Choose between:
+  - ChatGPTTurbo
+  - GPT4_Turbo
+  - GPT4
+  - GPT4o
+  - GPT4_32k_Context
+- **Custom Models**: Optionally specify custom models
 
-![image](https://github.com/user-attachments/assets/c1b8c35a-9719-4ec5-9146-112d347fc522)
+  ![Custom Model Settings](https://github.com/user-attachments/assets/c1b8c35a-9719-4ec5-9146-112d347fc522)
 
+## Features
 
-### Code It:
-Write a use case where you want to write the code, select the statement (if it's a single line, just click on the line), right-click, and click "AI Studio / **Code It**".
+### Code It
+1. Select code or click on a line
+2. Right-click → "AI Studio / **Code It**"
+3. Get AI-generated implementation
 
-![image](https://user-images.githubusercontent.com/4971326/232882864-85547d6f-75ee-4d49-8684-a3b736b5da2e.png)
+![Code It Example](https://user-images.githubusercontent.com/4971326/232882864-85547d6f-75ee-4d49-8684-a3b736b5da2e.png)
 
-Prints the result after a short time:
+**Result**:
+![Code It Output](https://user-images.githubusercontent.com/4971326/232883443-de21b5c2-3415-4f5b-bed9-49077bf7732c.png)
 
-![image](https://user-images.githubusercontent.com/4971326/232883443-de21b5c2-3415-4f5b-bed9-49077bf7732c.png)
+### Add Comments
+1. Select code
+2. Right-click → "AI Studio / **Add Comments**"
+3. Receive commented code
 
-### Add Comments:
-Select the lines of code you want to comment on, right-click, and click "AI Studio / **Add Comments**".
+![Add Comments Example](https://user-images.githubusercontent.com/4971326/232887104-8778b163-6cbf-4dcb-a12b-caa6ba266565.png)
 
-Returns the selected code with detailed comments.
+### Refactor
+1. Select method
+2. Right-click → "AI Studio / **Refactor**"
+3. Get optimized code
 
-![image](https://user-images.githubusercontent.com/4971326/232887104-8778b163-6cbf-4dcb-a12b-caa6ba266565.png)
+![Refactor Example](https://user-images.githubusercontent.com/4971326/232884573-c8f18fc5-3564-4d8d-ad3a-742b85142b36.png)
 
-### Refactor:
-Select the whole method, right-click, and click "AI Studio / **Refactor**".
+### Add Summary
+1. Select method or method header
+2. Right-click → "AI Studio / **Add Summary**"
+3. Receive detailed documentation
 
-The refactored result:
+![Summary Example](https://user-images.githubusercontent.com/4971326/232885737-84f7befa-1cad-4ff7-ba10-4b84f659b2fc.png)
 
-![image](https://user-images.githubusercontent.com/4971326/232884573-c8f18fc5-3564-4d8d-ad3a-742b85142b36.png)
+### Explain
+1. Select code
+2. Right-click → "AI Studio / **Explain**"
+3. View code explanation popup
 
-### Add Summary:
-Select the whole method or just the first line of the method, right-click, and click "AI Studio / **Add Summary**".
+![Explain Example](https://github.com/user-attachments/assets/3c419429-2586-428d-a1ef-599803d137da)
 
-Gives a very detailed and logical result:
+### Security Check
+1. Select code
+2. Right-click → "AI Studio / **Security Check**"
+3. Review security suggestions
 
-![image](https://user-images.githubusercontent.com/4971326/232885737-84f7befa-1cad-4ff7-ba10-4b84f659b2fc.png)
+![Security Check Example](https://github.com/user-attachments/assets/37dbecc7-9894-49ed-a70c-efe3bb8d03a8)
 
-### Explain:
-Select the lines of code you want to explain, right-click, and click "AI Studio / **Explain**".
+## Advanced Customization
 
-Shows a popup that includes explanations of the selected code:
+### Command Customization
+1. Navigate to *Tools/Options/AI Studio/Commands*
+2. Modify command behaviors with custom instructions
 
-![image](https://github.com/user-attachments/assets/3c419429-2586-428d-a1ef-599803d137da)
+![Command Settings](https://github.com/ekondur/AI-Studio/assets/4971326/0b49f17d-fa00-40dd-a1d3-ff8aa7e43f2d)
 
-#### Customizable Commands
-- AI studio is a flexible tool that allows you to customize all commands. Go to *Tools/Options/AI Studio/Commands*,
-- Write something to help chatGPT about the behaviors of the commands.
+**Customization Result**:
+![Custom Command Example](https://user-images.githubusercontent.com/4971326/232890352-64908383-623b-43f7-8dfa-32f305f67a43.png)
 
-![image](https://github.com/ekondur/AI-Studio/assets/4971326/0b49f17d-fa00-40dd-a1d3-ff8aa7e43f2d)
+### Unit Test Generation
+1. Select method
+2. Right-click → "AI Studio / **Add Unit Tests**"
+3. Get generated tests
 
-Then trigger the command again, and you will see the results affected by your comments:
+![Unit Test Example](https://github.com/user-attachments/assets/728816aa-228d-4b06-adbb-bd79e75ae633)
 
-![image](https://user-images.githubusercontent.com/4971326/232890352-64908383-623b-43f7-8dfa-32f305f67a43.png)
+Configure test generation at *Tools/Options/AI Studio/Unit Test*:
 
-### Add Unit Tests:
-Select the whole method, right-click, and click "AI Studio / **Add Unit Tests**".
+![Unit Test Settings](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
 
-Prints the unit test(s) based on your choices:
-
-![image](https://github.com/user-attachments/assets/728816aa-228d-4b06-adbb-bd79e75ae633)
-
-You can also customize the unit tests on *Tools/Options/AI Studio/Unit Test*
-
-![image](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
-
-- **Unit Testing Framework:** Select unit testing framework to set up main functionalities.
+#### Testing Framework Options
+- **Unit Testing**:
   - [MSTest](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest)
   - [xUnit](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test)
   - [NUnit](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit)
-- **Isolation Framework:** An isolation framework is a set of programmable APIs that makes creating fake objects much simpler, faster, and shorter than hand-coding them.
+  
+- **Isolation Frameworks**:
   - [Moq](https://github.com/Moq/moq4)
   - [FakeItEasy](https://github.com/FakeItEasy/FakeItEasy)
   - [NSubstitute](https://github.com/nsubstitute/NSubstitute)
-- **Test/Dummy Data Framework:** Test Data Builders and Dummy Data Generators.
+  
+- **Test Data**:
   - [AutoFixture](https://github.com/AutoFixture/AutoFixture)
   - [Bogus](https://github.com/bchavez/Bogus)
   - [GenFu](https://github.com/MisterJames/GenFu)
   - [NBuilder](https://github.com/nbuilder/nbuilder)
   - [AutoBogus](https://github.com/nickdodd79/AutoBogus)
-- **Fluent Assertions Framework:** Fluent assertions frameworks is a set of .NET extension methods that allow you to more naturally specify the expected outcome of a TDD or BDD-style unit test.
+  
+- **Assertion Libraries**:
   - [FluentAssertions](https://fluentassertions.com/introduction)
   - [Shouldly](https://docs.shouldly.org/)
   - [NFluent](https://github.com/tpierrain/NFluent)
-- **Customize:** Add any other details to customize unit tests.
-
-### Security Check:
-Select the code line(s), right-click, and click "AI Studio / **Security Check**".
-
-Gives some information and suggestions:
-
-![image](https://github.com/user-attachments/assets/37dbecc7-9894-49ed-a70c-efe3bb8d03a8)
-
+  
+- **Custom Instructions**: Add specific requirements for test generation
