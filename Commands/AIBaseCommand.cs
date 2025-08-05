@@ -2,9 +2,9 @@
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using OpenAI_API;
-using OpenAI_API.Chat;
-using OpenAI_API.Models;
+using OpenAI;
+using OpenAI.Chat;
+using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -29,14 +29,6 @@ namespace AI_Studio
             {
                 await VS.MessageBox.ShowAsync("API Key is missing, go to Tools/Options/AI Studio/General and add the API Key created from https://platform.openai.com/account/api-keys",
                     buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
-
-                Package.ShowOptionPage(typeof(General));
-                return;
-            }
-
-            if (generalOptions.LanguageModel == ChatLanguageModel.Custom && String.IsNullOrEmpty(generalOptions.CustomLanguageModel))
-            {
-                await VS.MessageBox.ShowAsync("Please specify a custom language model ID while Language Model is set to \"Custom\"", $"Go to Tools/Options/AI Studio/General and provide the language model ID provided from your endpoint at: {Environment.NewLine}{Environment.NewLine}{string.Format(generalOptions.ApiEndpoint,"v1", "models")}", buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
 
                 Package.ShowOptionPage(typeof(General));
                 return;
@@ -72,41 +64,39 @@ namespace AI_Studio
                 text = $"{docView.TextView.TextDataModel.ContentType.DisplayName}\n{text}";
             }
 
-            var api = new OpenAIAPI(generalOptions.ApiKey)
-            {
-                // Set endpoint from the settings
-                ApiUrlFormat = generalOptions.ApiEndpoint
-            };
-
-            var chatRequestTemplate = new ChatRequest()
-            {
-                Model = generalOptions.LanguageModel switch
+            // Prepare messages
+            var messages = new List<ChatMessage>
                 {
-                    ChatLanguageModel.GPT4 => Model.GPT4,
-                    ChatLanguageModel.GPT4_32k_Context => Model.GPT4_32k_Context,
-                    ChatLanguageModel.GPT4_Turbo => Model.GPT4_Turbo,
-                    ChatLanguageModel.GPT4o => new Model("gpt-4o") { OwnedBy = "openai" },
-                    ChatLanguageModel.Custom => new Model(generalOptions.CustomLanguageModel) { OwnedBy = generalOptions.OrganizationOwner },
-                    _ => Model.ChatGPTTurbo
-                }
-            };
-            var chat = api.Chat.CreateConversation(chatRequestTemplate);
+                    new SystemChatMessage(SystemMessage),
+                    new UserChatMessage(_addContentTypePrefix
+                        ? $"{docView.TextView.TextDataModel.ContentType.DisplayName}\n{text}"
+                        : text)
+                };
 
-            chat.AppendSystemMessage(SystemMessage);
-            chat.AppendUserInput(text);
             if (!string.IsNullOrEmpty(UserInput))
             {
-                chat.AppendUserInput(UserInput);
+                messages.Add(new UserChatMessage(UserInput));
             }
+
             foreach (var input in AssistantInputs)
             {
-                chat.AppendUserInput(input);
+                messages.Add(new UserChatMessage(input));
             }
+
+            ChatClient client = new ChatClient(
+                model: generalOptions.LanguageModel,
+                credential: new ApiKeyCredential(generalOptions.ApiKey),
+                options: new OpenAIClientOptions
+                {
+                    Endpoint = new Uri(generalOptions.ApiEndpoint)
+                }
+            );
 
             try
             {
-                string response = await chat.GetResponseFromChatbotAsync();
-                
+                var completion = await client.CompleteChatAsync(messages);
+                var response = completion.Value.Content[0].Text;
+
                 if (_stripResponseMarkdownCode)
                 {
                     response = StripResponseMarkdownCode(response);
@@ -124,8 +114,6 @@ namespace AI_Studio
                         break;
                     case ResponseBehavior.Message:
                         await ShowResponseInToolWindowAsync(response);
-                        // I wanna set here
-                        //await VS.MessageBox.ShowAsync(response, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
                         break;
                 }
             }
