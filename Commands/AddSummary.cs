@@ -11,6 +11,8 @@
             var opts = await Commands.GetLiveInstanceAsync();
 
             UserInput = opts.AddSummary;
+            _stripResponseMarkdownCode = true;
+            _addContentTypePrefix = true;
 
             await base.ExecuteAsync(e);
         }
