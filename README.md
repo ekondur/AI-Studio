@@ -8,7 +8,6 @@
 
 ![AI Studio Preview](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
 
----
 
 ## 🚀 Getting Started
 
@@ -20,14 +19,12 @@
 
    ![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
 
----
 
 ## ⚙️ Configuration Options
 
 - **Format Changed Text**: Automatically formats AI-generated/refactored code.  
 - **Language Model**: Switch between models or use a custom one for your endpoint.
 
----
 
 ## ✨ Features
 
@@ -44,7 +41,6 @@ Generate code for stubs or comments:
 **Result**:  
 ![Code Output](https://user-images.githubusercontent.com/4971326/232883443-de21b5c2-3415-4f5b-bed9-49077bf7732c.png)
 
----
 
 ### 💬 Add Comments
 
@@ -54,7 +50,6 @@ Generate code for stubs or comments:
 
 ![Add Comments](https://user-images.githubusercontent.com/4971326/232887104-8778b163-6cbf-4dcb-a12b-caa6ba266565.png)
 
----
 
 ### 🔁 Refactor
 
@@ -64,7 +59,6 @@ Generate code for stubs or comments:
 
 ![Refactor](https://user-images.githubusercontent.com/4971326/232884573-c8f18fc5-3564-4d8d-ad3a-742b85142b36.png)
 
----
 
 ### 📝 Add Summary
 
@@ -74,7 +68,6 @@ Generate code for stubs or comments:
 
 ![Summary](https://user-images.githubusercontent.com/4971326/232885737-84f7befa-1cad-4ff7-ba10-4b84f659b2fc.png)
 
----
 
 ### 📖 Explain
 
@@ -84,7 +77,6 @@ Generate code for stubs or comments:
 
 ![Explain](https://github.com/user-attachments/assets/3c419429-2586-428d-a1ef-599803d137da)
 
----
 
 ### 🔐 Security Check
 
@@ -94,7 +86,6 @@ Generate code for stubs or comments:
 
 ![Security Check](https://github.com/user-attachments/assets/37dbecc7-9894-49ed-a70c-efe3bb8d03a8)
 
----
 
 ## 🧪 Unit Test Generation
 
@@ -138,7 +129,6 @@ Configure test behaviors via:
 - **Custom Instructions**  
   Add special rules or constraints for your unit test generation.
 
----
 
 ## 🧩 Advanced Customization
 
@@ -154,7 +144,6 @@ Modify AI Studio behaviors using your own instructions:
 **Example Result**:  
 ![Custom Command](https://user-images.githubusercontent.com/4971326/232890352-64908383-623b-43f7-8dfa-32f305f67a43.png)
 
----
 
 ## 📌 Summary
 
