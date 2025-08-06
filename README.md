@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400ac43e51b04f3fb2f335c1688b8d4b)](https://app.codacy.com/gh/ekondur/AI-Studio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-> Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more—right from the right-click menu.
+> Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more, right from the right-click menu.
 
 🎯 [Available on Visual Studio Marketplace →](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
 
