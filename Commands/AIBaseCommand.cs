@@ -1,9 +1,8 @@
 ﻿using EnvDTE;
+using Microsoft.Extensions.AI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using OpenAI;
-using OpenAI.Chat;
 using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,35 +66,35 @@ namespace AI_Studio
             // Prepare messages
             var messages = new List<ChatMessage>
                 {
-                    new SystemChatMessage(SystemMessage),
-                    new UserChatMessage(_addContentTypePrefix
+                    new(ChatRole.System, SystemMessage),
+                    new(ChatRole.User, _addContentTypePrefix
                         ? $"{docView.TextView.TextDataModel.ContentType.DisplayName}\n{text}"
                         : text)
                 };
 
             if (!string.IsNullOrEmpty(UserInput))
             {
-                messages.Add(new UserChatMessage(UserInput));
+                messages.Add(new(ChatRole.User, UserInput));
             }
 
             foreach (var input in AssistantInputs)
             {
-                messages.Add(new UserChatMessage(input));
+                messages.Add(new(ChatRole.User, input));
             }
 
-            ChatClient client = new ChatClient(
+            IChatClient client = new OpenAI.Chat.ChatClient(
                 model: generalOptions.LanguageModel,
                 credential: new ApiKeyCredential(generalOptions.ApiKey),
-                options: new OpenAIClientOptions
+                options: new OpenAI.OpenAIClientOptions
                 {
                     Endpoint = new Uri(generalOptions.ApiEndpoint)
                 }
-            );
+            ).AsIChatClient();
 
             try
             {
-                var completion = await client.CompleteChatAsync(messages);
-                var response = completion.Value.Content[0].Text;
+                var completion = await client.GetResponseAsync(messages);
+                var response = completion.Text;
 
                 if (_stripResponseMarkdownCode)
                 {
