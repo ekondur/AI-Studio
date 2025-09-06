@@ -5,7 +5,7 @@
     {
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            SystemMessage = "Explain this code.";
+            SystemMessage = "Explain this code. Return with markdown format.";
             ResponseBehavior = ResponseBehavior.Message;
 
             var opts = await Commands.GetLiveInstanceAsync();

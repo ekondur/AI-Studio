@@ -112,10 +112,13 @@
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Markdig">
-      <Version>0.41.2</Version>
+      <Version>0.41.3</Version>
+    </PackageReference>
+    <PackageReference Include="Markdown.ColorCode">
+      <Version>3.0.1</Version>
     </PackageReference>
     <PackageReference Include="MessagePack">
-      <Version>2.5.187</Version>
+      <Version>3.1.4</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.AI">
       <Version>9.8.0</Version>
