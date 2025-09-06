@@ -11,7 +11,7 @@ namespace AI_Studio
         public const string Name = "AI Studio";
         public const string Description = @"Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more, right from the right-click menu.";
         public const string Language = "en-US";
-        public const string Version = "2.0.0";
+        public const string Version = "2.1.0";
         public const string Author = "Emrah Kondur";
         public const string Tags = "AI, UnitTest, Refactor, Summary, OpenAI";
     }
