@@ -1,4 +1,5 @@
 ﻿using Markdig;
+using Markdown.ColorCode;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,12 +11,18 @@ namespace AI_Studio
     public partial class OutputToolWindowControl : UserControl
     {
         private readonly WebBrowser _webBrowser;
+        private readonly MarkdownPipeline _markdownPipeline;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OutputToolWindowControl"/> class.
         /// </summary>
         public OutputToolWindowControl()
         {
+            _markdownPipeline = new MarkdownPipelineBuilder()
+               .UseAdvancedExtensions()
+               .UseColorCode()
+               .Build();
+            
             _webBrowser = new WebBrowser
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -28,23 +35,20 @@ namespace AI_Studio
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // Convert markdown to HTML (using Markdig)
-            var html = Markdown.ToHtml(content);
+            var bodyHtml = Markdig.Markdown.ToHtml(content, _markdownPipeline);
 
-            // Add basic CSS
-            var styledHtml = $@"
-            <html>
-            <head>
-                <style>
-                    body {{ font-family: 'Segoe UI', Arial; padding: 10px; }}
-                    pre {{ background: #f5f5f5; padding: 10px; }}
-                    code {{ background: #f5f5f5; }}
-                </style>
-            </head>
-            <body>{html}</body>
-            </html>";
+            var colorizedHtml = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset=""utf-8"" />
+                </head>
+                <body>
+                    {bodyHtml}
+                </body>
+                </html>";
 
-            _webBrowser.NavigateToString(styledHtml);
+            _webBrowser.NavigateToString(colorizedHtml);
         }
     }
 }
