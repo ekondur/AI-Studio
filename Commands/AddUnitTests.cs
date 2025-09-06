@@ -5,17 +5,32 @@
     {
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            SystemMessage = "Create Unit Test methods with the user inputs. Return with markdown format.";
+            SystemMessage = "Create Unit Test methods. Return with markdown format.";
             ResponseBehavior = ResponseBehavior.Message;
 
             var opts = await UnitTests.GetLiveInstanceAsync();
 
             UserInput = opts.Customize;
 
-            AssistantInputs.Add(opts.UnitTestingFramework.GetEnumDescription());
-            AssistantInputs.Add(opts.IsolationFramework.GetEnumDescription());
-            AssistantInputs.Add(opts.TestDataFramework.GetEnumDescription());
-            AssistantInputs.Add(opts.FluentAssertionFramework.GetEnumDescription());
+            if (!string.IsNullOrEmpty(opts.UnitTestingFramework))
+            {
+                AssistantInputs.Add($"UnitTesting framework is: {opts.UnitTestingFramework}");
+            }
+
+            if (!string.IsNullOrEmpty(opts.IsolationFramework))
+            {
+                AssistantInputs.Add($"Isolation framework is: {opts.IsolationFramework}");
+            }
+
+            if (!string.IsNullOrEmpty(opts.TestDataFramework))
+            {
+                AssistantInputs.Add($"Test/Dummy Data framework is: {opts.TestDataFramework}");
+            }
+
+            if (!string.IsNullOrEmpty(opts.AssertionFramework))
+            {
+                AssistantInputs.Add($"Assertions framework is: {opts.AssertionFramework}");
+            }
 
             await base.ExecuteAsync(e);
         }

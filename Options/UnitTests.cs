@@ -16,30 +16,26 @@ namespace AI_Studio
         [Category("Unit Test Settings")]
         [DisplayName("Unit Testing Framework")]
         [Description("Select unit testing framewok to setup main functionalities.")]
-        [DefaultValue(UnitTestingFramework.MSTest)]
-        [TypeConverter(typeof(EnumConverter))]
-        public UnitTestingFramework UnitTestingFramework { get; set; } = UnitTestingFramework.MSTest;
+        [DefaultValue("MSTest")]
+        public string UnitTestingFramework { get; set; } = "MSTest";
 
         [Category("Unit Test Settings")]
         [DisplayName("Isolation Framework")]
         [Description("An isolation framework is a set of programmable APIs that makes creating fake objects much simpler, faster, and shorter than hand-coding them.")]
-        [DefaultValue(IsolationFramework.None)]
-        [TypeConverter(typeof(EnumConverter))]
-        public IsolationFramework IsolationFramework { get; set; } = IsolationFramework.None;
+        [DefaultValue("Moq")]
+        public string IsolationFramework { get; set; } = "Moq";
 
         [Category("Unit Test Settings")]
         [DisplayName("Test/Dummy Data Framework")]
         [Description("Test Data Builders and Dummy Data Generators.")]
-        [DefaultValue(TestDataFramework.None)]
-        [TypeConverter(typeof(EnumConverter))]
-        public TestDataFramework TestDataFramework { get; set; } = TestDataFramework.None;
+        [DefaultValue("AutoFixture")] 
+        public string TestDataFramework { get; set; } = "AutoFixture";
 
         [Category("Unit Test Settings")]
-        [DisplayName("Fluent Assertions Framework")]
-        [Description("Fluent assertions frameworks is a set of .NET extension methods that allow you to more naturally specify the expected outcome of a TDD or BDD-style unit test.")]
-        [DefaultValue(FluentAssertionFramework.None)]
-        [TypeConverter(typeof(EnumConverter))]
-        public FluentAssertionFramework FluentAssertionFramework { get; set; } = FluentAssertionFramework.None;
+        [DisplayName("Assertion Framework")]
+        [Description("Assertion frameworks is a set of .NET extension methods that allow you to more naturally specify the expected outcome of a TDD or BDD-style unit test.")]
+        [DefaultValue("FluentAssertions")] 
+        public string AssertionFramework { get; set; } = "FluentAssertions";
 
         [Category("Unit Test Settings")]
         [DisplayName("Customize")]
