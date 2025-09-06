@@ -102,30 +102,6 @@ Configure test behaviors via:
 
 ![Unit Test Settings](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
 
-#### Supported Frameworks
-
-- **Unit Testing**
-  - [MSTest](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest)
-  - [xUnit](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test)
-  - [NUnit](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit)
-
-- **Mocking & Isolation**
-  - [Moq](https://github.com/Moq/moq4)
-  - [FakeItEasy](https://github.com/FakeItEasy/FakeItEasy)
-  - [NSubstitute](https://github.com/nsubstitute/NSubstitute)
-
-- **Test Data Generators**
-  - [AutoFixture](https://github.com/AutoFixture/AutoFixture)
-  - [Bogus](https://github.com/bchavez/Bogus)
-  - [GenFu](https://github.com/MisterJames/GenFu)
-  - [NBuilder](https://github.com/nbuilder/nbuilder)
-  - [AutoBogus](https://github.com/nickdodd79/AutoBogus)
-
-- **Assertion Libraries**
-  - [FluentAssertions](https://fluentassertions.com/introduction)
-  - [Shouldly](https://docs.shouldly.org/)
-  - [NFluent](https://github.com/tpierrain/NFluent)
-
 - **Custom Instructions**  
   Add special rules or constraints for your unit test generation.
 
