@@ -52,11 +52,7 @@
     <Compile Include="Commands\Refactor.cs" />
     <Compile Include="Commands\CodeIt.cs" />
     <Compile Include="Commands\SecurityCheck.cs" />
-    <Compile Include="Enums\FluentAssertionFramework.cs" />
-    <Compile Include="Enums\IsolationFramework.cs" />
     <Compile Include="Enums\ResponseBehavior.cs" />
-    <Compile Include="Enums\TestDataFramework.cs" />
-    <Compile Include="Enums\UnitTestingFramework.cs" />
     <Compile Include="Helpers\EnumHelpers.cs" />
     <Compile Include="Options\Commands.cs" />
     <Compile Include="Options\General.cs" />
