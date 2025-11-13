@@ -1,4 +1,7 @@
 ﻿using EnvDTE;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.AI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -40,14 +43,34 @@ namespace AI_Studio
             twd.StartWaitDialog("AI Studio", "Working on it...", "", null, "", 1, false, true);
 
             var docView = await VS.Documents.GetActiveDocumentViewAsync();
+            var snapshot = docView.TextView.TextBuffer.CurrentSnapshot;
             var selection = docView.TextView.Selection.SelectedSpans.FirstOrDefault();
+            if (selection.Snapshot == null)
+            {
+                var caretPoint = docView.TextView.Caret.Position.BufferPosition;
+                selection = new SnapshotSpan(caretPoint, caretPoint);
+            }
+
             if (selection.Length == 0)
             {
-                var textBuffer = docView.TextView.TextBuffer;
-                var line = textBuffer.CurrentSnapshot.GetLineFromPosition(selection.Start.Position);
-                var snapshotSpan = new SnapshotSpan(line.Start, line.End);
-                docView.TextView.Selection.Select(snapshotSpan, false);
+                if (TryExpandSelectionToMethod(snapshot, selection.Start.Position, out var methodSpan))
+                {
+                    docView.TextView.Selection.Select(methodSpan, false);
+                }
+                else
+                {
+                    var line = snapshot.GetLineFromPosition(selection.Start.Position);
+                    var snapshotSpan = new SnapshotSpan(line.Start, line.End);
+                    docView.TextView.Selection.Select(snapshotSpan, false);
+                }
+
                 selection = docView.TextView.Selection.SelectedSpans.FirstOrDefault();
+            }
+
+            if (selection.Snapshot == null)
+            {
+                var caretPoint = docView.TextView.Caret.Position.BufferPosition;
+                selection = new SnapshotSpan(caretPoint, caretPoint);
             }
             var text = docView.TextView.Selection.StreamSelectionSpan.GetText();
             int selectionStartLineNumber = docView.TextView.TextBuffer.CurrentSnapshot.GetLineNumberFromPosition(selection.Start.Position);
@@ -141,6 +164,48 @@ namespace AI_Studio
         {
             var regex = new Regex(@"```.*\r?\n?");
             return regex.Replace(response, "");
+        }
+
+        private bool TryExpandSelectionToMethod(ITextSnapshot snapshot, int caretPosition, out SnapshotSpan methodSpan)
+        {
+            methodSpan = default;
+
+            if (snapshot == null || snapshot.Length == 0)
+            {
+                return false;
+            }
+
+            SyntaxTree syntaxTree;
+            try
+            {
+                syntaxTree = CSharpSyntaxTree.ParseText(snapshot.GetText());
+            }
+            catch
+            {
+                return false;
+            }
+
+            var root = syntaxTree.GetRoot();
+            var safePosition = Math.Max(0, Math.Min(caretPosition, snapshot.Length - 1));
+            var token = root.FindToken(safePosition, findInsideTrivia: true);
+            var methodNode = token.Parent?
+                .AncestorsAndSelf()
+                .OfType<BaseMethodDeclarationSyntax>()
+                .FirstOrDefault();
+
+            if (methodNode == null)
+            {
+                return false;
+            }
+
+            var span = methodNode.FullSpan;
+            if (span.End > snapshot.Length)
+            {
+                return false;
+            }
+
+            methodSpan = new SnapshotSpan(snapshot, Span.FromBounds(span.Start, span.End));
+            return true;
         }
 
         private async Task ShowResponseInToolWindowAsync(string response)

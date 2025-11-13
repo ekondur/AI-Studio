@@ -2,125 +2,191 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400ac43e51b04f3fb2f335c1688b8d4b)](https://app.codacy.com/gh/ekondur/AI-Studio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-> Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more, right from the right-click menu.
+AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generation, refactoring, documentation, testing, and security analysis to the IDE directly from the context menu.
 
-🎯 [Available on Visual Studio Marketplace →](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
+- [Download from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
+- [Report an issue or request a feature](https://github.com/ekondur/AI-Studio/issues)
 
 ![AI Studio Preview](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
 
+## Table of Contents
 
-## 🚀 Getting Started
+- [Highlights](#highlights)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Command Cheat Sheet](#command-cheat-sheet)
+- [Feature Walkthrough](#feature-walkthrough)
+- [Configuration](#configuration)
+- [Advanced Customization](#advanced-customization)
+- [Troubleshooting and Feedback](#troubleshooting-and-feedback)
+- [License](#license)
 
-1. **Get Your API Key**  
-   Sign in to [OpenAI](https://platform.openai.com/account/api-keys) to create your API key.
+## Highlights
 
-2. **Configure AI Studio**  
-   Go to `Tools → Options → AI Studio` and paste in your API key.
+- Seamless right-click workflow across C#, XAML, and most text-based files inside Visual Studio.
+- Works with your own OpenAI key (or any compatible endpoint) so you stay in control of data and cost.
+- Generates or updates code while preserving formatting, documentation, and project conventions.
+- Built-in commands for documentation, explanations, security review, and unit test creation keep teams in flow.
 
-   ![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
+## Requirements
 
+- Visual Studio 2022 17.6 or later with the VSIX extension workload installed.
+- An active OpenAI API key (or a compatible Azure/OpenAI endpoint) with network access from the IDE.
+- .NET Framework 4.8 SDK (installed with Visual Studio) for local builds.
 
-## ⚙️ Configuration Options
+## Installation
 
-- **Format Changed Text**: Automatically formats AI-generated/refactored code.  
-- **Language Model**: Switch between models or use a custom one for your endpoint.
+### Marketplace (recommended)
 
+1. Open Visual Studio and choose `Extensions > Manage Extensions`.
+2. Search for **AI Studio**.
+3. Click **Download** and restart Visual Studio to complete the installation.
 
-## ✨ Features
+### Build from source
 
-### 🔧 Code It
+1. Clone or fork this repository.
+2. Open `AI Studio.sln` in Visual Studio 2022.
+3. Build the solution in `Release` mode.
+4. Double-click the generated `.vsix` under `bin\Release` to install it into your local instance.
 
-Generate code for stubs or comments:
+## Quick Start
 
-1. Select code or place cursor on a line  
-2. Right-click → `AI Studio → Code It`  
-3. View AI-generated implementation
+1. **Create an API key** at [OpenAI](https://platform.openai.com/account/api-keys) (or configure your own endpoint).
+2. **Configure AI Studio** via `Tools > Options > AI Studio` and paste the key into the **General** page.
+3. **Pick a feature** (for example, Code It) by selecting code, right-clicking, and choosing the desired AI Studio command.
+
+### Using Private or Self-Hosted LLMs
+
+AI Studio can call any OpenAI-compatible endpoint, including private or on-prem LLM gateways:
+
+1. In `Tools > Options > AI Studio > General`, switch the **Base URL** to your private endpoint (for example, `https://llm.internal/api/v1`).
+2. Enter the API key/token issued by your internal gateway.
+3. (Optional) In `Tools > Options > AI Studio > Commands`, override individual commands to target different models (`gpt-4o`, `gpt-4o-mini`, `my-company-llm`) or apply custom instructions.
+
+**Example setups**
+
+- Point to Azure OpenAI by pasting the resource URL and deployment name, then set the API version in Advanced options.
+- Target a self-hosted Llama/phi/DeepSeek deployment behind an OpenAI-compatible proxy such as litellm or Text Generation Inference.
+- Mix providers: keep Code It on OpenAI, but route Security Check to an internal compliance-tuned model via the Commands page.
+
+![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
+
+## Command Cheat Sheet
+
+| Command | When to use | Output |
+| --- | --- | --- |
+| Code It | Turn TODOs or signatures into working code. | Inserts generated implementation inline. |
+| Add Comments | Document existing logic without manual XML comments. | Adds inline comments or summaries. |
+| Add Summary | Produce XML doc comments for public APIs. | Generates `<summary>` and related tags. |
+| Refactor | Improve readability or performance of selected code. | Replaces the selection with an optimized version. |
+| Explain | Understand unfamiliar code quickly. | Displays a plain-language explanation. |
+| Security Check | Inspect code for risky patterns and mitigations. | Lists potential vulnerabilities plus suggestions. |
+| Add Unit Tests | Generate unit tests tailored to the selected method. | Creates a new test class or method snippet. |
+
+## Feature Walkthrough
+
+### Code It
+
+1. Place the caret on an empty method or select a stub.
+2. Right-click and choose `AI Studio > Code It`.
+3. Review the generated implementation and accept or adjust as needed.
 
 ![Code It](https://user-images.githubusercontent.com/4971326/232882864-85547d6f-75ee-4d49-8684-a3b736b5da2e.png)
 
-**Result**:  
+**Result**
+
 ![Code Output](https://user-images.githubusercontent.com/4971326/232883443-de21b5c2-3415-4f5b-bed9-49077bf7732c.png)
 
+### Add Comments
 
-### 💬 Add Comments
-
-1. Select code  
-2. Right-click → `AI Studio → Add Comments`  
-3. Receive clean, inline comments
+1. Highlight the code you want documented.
+2. Run `AI Studio > Add Comments`.
+3. AI Studio adds concise inline comments without disturbing formatting.
 
 ![Add Comments](https://user-images.githubusercontent.com/4971326/232887104-8778b163-6cbf-4dcb-a12b-caa6ba266565.png)
 
+### Refactor
 
-### 🔁 Refactor
-
-1. Select a method  
-2. Right-click → `AI Studio → Refactor`  
-3. View optimized code
+1. Select a method or block.
+2. Choose `AI Studio > Refactor`.
+3. Compare the result with the original and apply the pieces you want to keep.
 
 ![Refactor](https://user-images.githubusercontent.com/4971326/232884573-c8f18fc5-3564-4d8d-ad3a-742b85142b36.png)
 
+### Add Summary
 
-### 📝 Add Summary
-
-1. Select a method or its header  
-2. Right-click → `AI Studio → Add Summary`  
-3. Generate XML-style documentation
+1. Select a method header or type declaration.
+2. Run `AI Studio > Add Summary`.
+3. Automatically generates XML documentation that matches the signature.
 
 ![Summary](https://user-images.githubusercontent.com/4971326/232885737-84f7befa-1cad-4ff7-ba10-4b84f659b2fc.png)
 
+### Explain
 
-### 📖 Explain
-
-1. Select code  
-2. Right-click → `AI Studio → Explain`  
-3. See code explanation in a popup
+1. Highlight unfamiliar code.
+2. Choose `AI Studio > Explain`.
+3. A popup summarizes what the code does and why.
 
 ![Explain](https://github.com/user-attachments/assets/3c419429-2586-428d-a1ef-599803d137da)
 
+### Security Check
 
-### 🔐 Security Check
-
-1. Select code  
-2. Right-click → `AI Studio → Security Check`  
-3. View potential vulnerabilities and suggestions
+1. Select code that handles I/O, crypto, or user data.
+2. Run `AI Studio > Security Check`.
+3. Review the flagged issues and suggested mitigations.
 
 ![Security Check](https://github.com/user-attachments/assets/37dbecc7-9894-49ed-a70c-efe3bb8d03a8)
 
+### Unit Test Generation
 
-## 🧪 Unit Test Generation
-
-1. Select a method  
-2. Right-click → `AI Studio → Add Unit Tests`  
-3. Instantly generate unit tests
+1. Highlight a method to test.
+2. Run `AI Studio > Add Unit Tests`.
+3. AI Studio generates arrange/act/assert scaffolding tailored to the method.
 
 ![Unit Test Example](https://github.com/user-attachments/assets/728816aa-228d-4b06-adbb-bd79e75ae633)
 
-### Test Configuration
+#### Test Configuration
 
-Configure test behaviors via:  
-`Tools → Options → AI Studio → Unit Test`
+Configure test generation under `Tools > Options > AI Studio > Unit Test`.
 
 ![Unit Test Settings](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
 
-- **Custom Instructions**  
-  Add special rules or constraints for your unit test generation.
+- **Custom instructions** let you specify frameworks (xUnit, NUnit, MSTest), naming rules, or mocking preferences.
+- **Response behavior** controls how aggressively tests are regenerated versus appended.
 
+## Configuration
 
-## 🧩 Advanced Customization
+All configuration lives under `Tools > Options > AI Studio`:
 
-### ✏️ Command Customization
+- **General**
+  - Paste your API key, pick the default model, and decide whether to format AI changes automatically.
+  - Toggle telemetry/diagnostics and adjust temperature or response size if needed.
+- **Commands**
+  - Override the system prompt for each command, enforce coding guidelines, or switch to a custom model per command.
+- **Unit Test**
+  - Choose the target test framework, namespace, class name template, and add reusable instructions for deterministic tests.
 
-Modify AI Studio behaviors using your own instructions:
+## Advanced Customization
 
-1. Go to `Tools → Options → AI Studio → Commands`  
-2. Customize each action with your own prompt/instructions
+- **Custom prompts per command**: Tailor Refactor to focus on performance while Configure Comments to prioritize XML docs using `Tools > Options > AI Studio > Commands`.
+- **Bring your own endpoint**: Point the extension at Azure OpenAI, a private/self-hosted LLM gateway, or any OpenAI-compatible proxy by entering the base URL and model ID in the General page.
+- **Formatting control**: Enable *Format changed text* to run Visual Studio formatting on every AI edit to keep diffs clean.
+- **Response behavior**: Decide whether AI should insert results inline, append to the Output window first, or prompt for confirmation.
 
 ![Command Settings](https://github.com/ekondur/AI-Studio/assets/4971326/0b49f17d-fa00-40dd-a1d3-ff8aa7e43f2d)
 
-**Example Result**:  
+**Example result**
+
 ![Custom Command](https://user-images.githubusercontent.com/4971326/232890352-64908383-623b-43f7-8dfa-32f305f67a43.png)
 
+## Troubleshooting and Feedback
 
-## 📌 Summary
+- Verify your API key and quota if requests fail; the Output tool window surfaces errors returned by the provider.
+- Ensure Visual Studio can reach the OpenAI endpoint (corporate proxies may need to allowlist it).
+- Capture screenshots/logs and [open an issue](https://github.com/ekondur/AI-Studio/issues) for bugs or ideas.
+- Contributions are welcome via pull requests; please include before/after screenshots for UI tweaks.
 
-AI Studio makes AI assistance a seamless part of your development workflow in Visual Studio. Whether you're generating code, documenting, testing, or refactoring—it’s all just a right-click away.
+## License
+
+AI Studio is released under the [MIT License](LICENSE). Use it in personal or commercial projects with attribution.
