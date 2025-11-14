@@ -56,6 +56,8 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 2. **Configure AI Studio** via `Tools > Options > AI Studio` and paste the key into the **General** page.
 3. **Pick a feature** (for example, Code It) by selecting code, right-clicking, and choosing the desired AI Studio command.
 
+![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
+
 ### Using Private or Self-Hosted LLMs
 
 AI Studio can call any OpenAI-compatible endpoint, including private or on-prem LLM gateways:
@@ -63,14 +65,6 @@ AI Studio can call any OpenAI-compatible endpoint, including private or on-prem 
 1. In `Tools > Options > AI Studio > General`, switch the **Base URL** to your private endpoint (for example, `https://llm.internal/api/v1`).
 2. Enter the API key/token issued by your internal gateway.
 3. (Optional) In `Tools > Options > AI Studio > Commands`, override individual commands to target different models (`gpt-4o`, `gpt-4o-mini`, `my-company-llm`) or apply custom instructions.
-
-**Example setups**
-
-- Point to Azure OpenAI by pasting the resource URL and deployment name, then set the API version in Advanced options.
-- Target a self-hosted Llama/phi/DeepSeek deployment behind an OpenAI-compatible proxy such as litellm or Text Generation Inference.
-- Mix providers: keep Code It on OpenAI, but route Security Check to an internal compliance-tuned model via the Commands page.
-
-![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
 
 ## Command Cheat Sheet
 
