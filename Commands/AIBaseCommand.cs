@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Text;
 using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AI_Studio
@@ -41,6 +42,18 @@ namespace AI_Studio
             IVsThreadedWaitDialog4 twd = fac.CreateInstance();
 
             twd.StartWaitDialog("AI Studio", "Working on it...", "", null, "", 1, false, true);
+            var waitEnded = false;
+            async Task EndWaitDialogOnceAsync()
+            {
+                if (waitEnded)
+                {
+                    return;
+                }
+
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                twd.EndWaitDialog();
+                waitEnded = true;
+            }
 
             var docView = await VS.Documents.GetActiveDocumentViewAsync();
             var snapshot = docView.TextView.TextBuffer.CurrentSnapshot;
@@ -116,33 +129,82 @@ namespace AI_Studio
 
             try
             {
-                var completion = await client.GetResponseAsync(messages);
-                var response = completion.Text;
+                var responseBuilder = new StringBuilder();
+                var insertionStart = ResponseBehavior == ResponseBehavior.Insert
+                    ? selection.End.Position
+                    : selection.Start.Position;
+                var currentLength = 0;
+                var hasReplacedInitial = false;
+
+                await foreach (var update in client.GetStreamingResponseAsync(messages))
+                {
+                    var chunk = update?.Text;
+                    if (string.IsNullOrEmpty(chunk))
+                    {
+                        continue;
+                    }
+
+                    var chunkOffset = currentLength;
+                    var chunkToApply = chunk;
+
+                    if (ResponseBehavior == ResponseBehavior.Insert && currentLength == 0)
+                    {
+                        chunkToApply = Environment.NewLine + chunkToApply;
+                    }
+
+                    await EndWaitDialogOnceAsync();
+
+                    responseBuilder.Append(chunkToApply);
+
+                    if (ResponseBehavior == ResponseBehavior.Message)
+                    {
+                        await ShowResponseInToolWindowAsync(responseBuilder.ToString());
+                        continue;
+                    }
+
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                    if (ResponseBehavior == ResponseBehavior.Replace && !hasReplacedInitial)
+                    {
+                        docView.TextBuffer.Replace(selection, chunkToApply);
+                        hasReplacedInitial = true;
+                        currentLength = chunkToApply.Length;
+                        continue;
+                    }
+
+                    docView.TextBuffer.Insert(insertionStart + chunkOffset, chunkToApply);
+                    currentLength += chunkToApply.Length;
+                }
+
+                var response = responseBuilder.ToString();
 
                 if (_stripResponseMarkdownCode)
                 {
                     response = StripResponseMarkdownCode(response);
                 }
 
-                twd.EndWaitDialog();
-
-                switch (ResponseBehavior)
+                if (ResponseBehavior == ResponseBehavior.Message)
                 {
-                    case ResponseBehavior.Insert:
-                        docView.TextBuffer.Insert(selection.End, Environment.NewLine + response);
-                        break;
-                    case ResponseBehavior.Replace:
-                        docView.TextBuffer.Replace(selection, response);
-                        break;
-                    case ResponseBehavior.Message:
-                        await ShowResponseInToolWindowAsync(response);
-                        break;
+                    await ShowResponseInToolWindowAsync(response);
                 }
+                else
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    docView.TextBuffer.Replace(new Span(insertionStart, currentLength), response);
+
+                    var finalSnapshot = docView.TextBuffer.CurrentSnapshot;
+                    selection = new SnapshotSpan(finalSnapshot, Span.FromBounds(insertionStart, insertionStart + response.Length));
+                    docView.TextView.Selection.Select(selection, false);
+                }
+
             }
             catch (Exception ex)
             {
-                twd.EndWaitDialog();
                 await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+            }
+            finally
+            {
+                await EndWaitDialogOnceAsync();
             }
 
             if (generalOptions.FormatChangedText && ResponseBehavior != ResponseBehavior.Message)
