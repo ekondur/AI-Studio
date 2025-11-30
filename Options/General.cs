@@ -16,6 +16,7 @@ namespace AI_Studio
         [Category("General")]
         [DisplayName("API Key")]
         [Description("AI Studio utilizes Chat GPT API, to use this extension create an API Key and add it here.")]
+        [PasswordPropertyText(true)]
         public string ApiKey { get; set; }
 
         [Category("General")]
