@@ -86,19 +86,11 @@ AI Studio can call any OpenAI-compatible endpoint, including private or on-prem 
 2. Right-click and choose `AI Studio > Code It`.
 3. Review the generated implementation and accept or adjust as needed.
 
-![Code It](https://user-images.githubusercontent.com/4971326/232882864-85547d6f-75ee-4d49-8684-a3b736b5da2e.png)
-
-**Result**
-
-![Code Output](https://user-images.githubusercontent.com/4971326/232883443-de21b5c2-3415-4f5b-bed9-49077bf7732c.png)
-
 ### Add Comments
 
 1. Highlight the code you want documented.
 2. Run `AI Studio > Add Comments`.
 3. AI Studio adds concise inline comments without disturbing formatting.
-
-![Add Comments](https://user-images.githubusercontent.com/4971326/232887104-8778b163-6cbf-4dcb-a12b-caa6ba266565.png)
 
 ### Refactor
 
@@ -106,15 +98,11 @@ AI Studio can call any OpenAI-compatible endpoint, including private or on-prem 
 2. Choose `AI Studio > Refactor`.
 3. Compare the result with the original and apply the pieces you want to keep.
 
-![Refactor](https://user-images.githubusercontent.com/4971326/232884573-c8f18fc5-3564-4d8d-ad3a-742b85142b36.png)
-
 ### Add Summary
 
 1. Select a method header or type declaration.
 2. Run `AI Studio > Add Summary`.
 3. Automatically generates XML documentation that matches the signature.
-
-![Summary](https://user-images.githubusercontent.com/4971326/232885737-84f7befa-1cad-4ff7-ba10-4b84f659b2fc.png)
 
 ### Explain
 
@@ -122,23 +110,17 @@ AI Studio can call any OpenAI-compatible endpoint, including private or on-prem 
 2. Choose `AI Studio > Explain`.
 3. A popup summarizes what the code does and why.
 
-![Explain](https://github.com/user-attachments/assets/3c419429-2586-428d-a1ef-599803d137da)
-
 ### Security Check
 
 1. Select code that handles I/O, crypto, or user data.
 2. Run `AI Studio > Security Check`.
 3. Review the flagged issues and suggested mitigations.
 
-![Security Check](https://github.com/user-attachments/assets/37dbecc7-9894-49ed-a70c-efe3bb8d03a8)
-
 ### Unit Test Generation
 
 1. Highlight a method to test.
 2. Run `AI Studio > Add Unit Tests`.
 3. AI Studio generates arrange/act/assert scaffolding tailored to the method.
-
-![Unit Test Example](https://github.com/user-attachments/assets/728816aa-228d-4b06-adbb-bd79e75ae633)
 
 #### Test Configuration
 
@@ -169,10 +151,6 @@ All configuration lives under `Tools > Options > AI Studio`:
 - **Response behavior**: Decide whether AI should insert results inline, append to the Output window first, or prompt for confirmation.
 
 ![Command Settings](https://github.com/ekondur/AI-Studio/assets/4971326/0b49f17d-fa00-40dd-a1d3-ff8aa7e43f2d)
-
-**Example result**
-
-![Custom Command](https://user-images.githubusercontent.com/4971326/232890352-64908383-623b-43f7-8dfa-32f305f67a43.png)
 
 ## Troubleshooting and Feedback
 
