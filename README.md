@@ -28,6 +28,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 - Works with your own OpenAI key (or any compatible endpoint) so you stay in control of data and cost.
 - Generates or updates code while preserving formatting, documentation, and project conventions.
 - Built-in commands for documentation, explanations, security review, and unit test creation keep teams in flow.
+- Integrated Output tool window now supports follow-up chat with a VS-themed input bar and smooth streaming updates without focus jumps.
 
 ## Requirements
 
