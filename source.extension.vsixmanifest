@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="AI_Studio.74F4FED3-20F1-4F08-BEC5-1219C8EDC2AD" Version="2.3.0" Language="en-US" Publisher="Emrah Kondur" />
+        <Identity Id="AI_Studio.74F4FED3-20F1-4F08-BEC5-1219C8EDC2AD" Version="2.4.0" Language="en-US" Publisher="Emrah Kondur" />
         <DisplayName>AI Studio</DisplayName>
         <Description xml:space="preserve">Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more, right from the right-click menu.</Description>
         <License>License.txt</License>
-        <ReleaseNotes>https://github.com/ekondur/AI-Studio/releases/tag/v2.3.0</ReleaseNotes>
+        <ReleaseNotes>https://github.com/ekondur/AI-Studio/releases/tag/v2.4.0</ReleaseNotes>
         <Icon>Resources\Icon.png</Icon>
         <PreviewImage>Resources\Icon.png</PreviewImage>
         <Tags>AI, UnitTest, Refactor, Summary, OpenAI</Tags>
