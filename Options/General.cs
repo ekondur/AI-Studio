@@ -14,28 +14,34 @@ namespace AI_Studio
     public class General : BaseOptionModel<General>
     {
         [Category("General")]
+        [DisplayName("AI Provider")]
+        [Description("Select the AI provider to use. OpenAI: requires an API key from platform.openai.com. Anthropic: requires an API key from console.anthropic.com. Ollama: runs locally, no API key needed.")]
+        [DefaultValue(AIProvider.OpenAI)]
+        [TypeConverter(typeof(EnumConverter))]
+        public AIProvider Provider { get; set; } = AIProvider.OpenAI;
+
+        [Category("General")]
         [DisplayName("API Key")]
-        [Description("AI Studio utilizes Chat GPT API, to use this extension create an API Key and add it here.")]
+        [Description("API key for the selected provider. Not required for Ollama. OpenAI: platform.openai.com/account/api-keys. Anthropic: console.anthropic.com/settings/keys.")]
         [PasswordPropertyText(true)]
         public string ApiKey { get; set; }
+
+        [Category("General")]
+        [DisplayName("Language Model")]
+        [Description("Model name to use. OpenAI examples: gpt-4o-mini, gpt-4o, o4-mini. Anthropic examples: claude-sonnet-4-5, claude-opus-4-5. Ollama examples: llama3.2, mistral, codestral.")]
+        [DefaultValue("gpt-4o-mini")]
+        public string LanguageModel { get; set; } = "gpt-4o-mini";
+
+        [Category("General")]
+        [DisplayName("API Endpoint")]
+        [Description("Base URL for the API. OpenAI: https://api.openai.com/v1/  Ollama: http://localhost:11434/v1/  Not used for Anthropic.")]
+        [DefaultValue("https://api.openai.com/v1/")]
+        public string ApiEndpoint { get; set; } = "https://api.openai.com/v1/";
 
         [Category("General")]
         [DisplayName("Format Changed Text")]
         [Description("Format text after change.")]
         [DefaultValue(true)]
         public bool FormatChangedText { get; set; } = true;
-
-        [Category("General")]
-        [DisplayName("Language Model")]
-        [Description("Chat language model")]
-        [DefaultValue("o4-mini")]
-        public string LanguageModel { get; set; } = "o4-mini";
-
-        [Category("General")]
-        [DisplayName("API Endpoint")]
-        [Description("URL containing the OpenAI API endpoint format.")]
-        [DefaultValue("https://api.openai.com/v1/")]
-        public string ApiEndpoint { get; set; } = "https://api.openai.com/v1/";
-
     }
 }

@@ -25,7 +25,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 ## Highlights
 
 - Seamless right-click workflow across C#, XAML, and most text-based files inside Visual Studio.
-- Works with your own OpenAI key (or any compatible endpoint) so you stay in control of data and cost.
+- Supports **OpenAI**, **Anthropic (Claude)**, and **Ollama** (local models) — switch provider from the Options page.
 - Generates or updates code while preserving formatting, documentation, and project conventions.
 - Built-in commands for documentation, explanations, security review, and unit test creation keep teams in flow.
 - Integrated Output tool window now supports follow-up chat with a VS-themed input bar and smooth streaming updates without focus jumps.
@@ -33,7 +33,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 ## Requirements
 
 - Visual Studio 2022 17.6 or later with the VSIX extension workload installed.
-- An active OpenAI API key (or a compatible Azure/OpenAI endpoint) with network access from the IDE.
+- An API key for your chosen provider (not required for Ollama) with network access from the IDE.
 - .NET Framework 4.8 SDK (installed with Visual Studio) for local builds.
 
 ## Installation
@@ -53,19 +53,50 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 
 ## Quick Start
 
-1. **Create an API key** at [OpenAI](https://platform.openai.com/account/api-keys) (or configure your own endpoint).
-2. **Configure AI Studio** via `Tools > Options > AI Studio` and paste the key into the **General** page.
+1. **Choose a provider** and obtain an API key if required (see the [Provider Setup](#provider-setup) section below).
+2. **Configure AI Studio** via `Tools > Options > AI Studio > General`: set the **AI Provider**, paste the key, and enter the model name.
 3. **Pick a feature** (for example, Code It) by selecting code, right-clicking, and choosing the desired AI Studio command.
 
 ![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
 
-### Using Private or Self-Hosted LLMs
+## Provider Setup
 
-AI Studio can call any OpenAI-compatible endpoint, including private or on-prem LLM gateways:
+AI Studio supports three providers out of the box. Switch between them at any time under `Tools > Options > AI Studio > General`.
 
-1. In `Tools > Options > AI Studio > General`, switch the **Base URL** to your private endpoint (for example, `https://llm.internal/api/v1`).
-2. Enter the API key/token issued by your internal gateway.
-3. (Optional) In `Tools > Options > AI Studio > Commands`, override individual commands to target different models (`gpt-4o`, `gpt-4o-mini`, `my-company-llm`) or apply custom instructions.
+### OpenAI
+
+| Setting | Value |
+| --- | --- |
+| AI Provider | `OpenAI` |
+| API Key | Your key from [platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys) |
+| Language Model | e.g. `gpt-4o-mini`, `gpt-4o`, `o4-mini` |
+| API Endpoint | `https://api.openai.com/v1/` (default) |
+
+### Anthropic (Claude)
+
+| Setting | Value |
+| --- | --- |
+| AI Provider | `Anthropic` |
+| API Key | Your key from [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
+| Language Model | e.g. `claude-sonnet-4-5`, `claude-opus-4-5`, `claude-haiku-4-5` |
+| API Endpoint | *(not used — handled by the SDK)* |
+
+### Ollama (local models, no API key required)
+
+[Ollama](https://ollama.com) runs models locally on your machine. No API key or internet access is required.
+
+| Setting | Value |
+| --- | --- |
+| AI Provider | `Ollama` |
+| API Key | *(leave empty)* |
+| Language Model | e.g. `llama3.2`, `mistral`, `codestral` |
+| API Endpoint | `http://localhost:11434/v1/` (default) |
+
+Pull a model first with `ollama pull llama3.2`, then start Ollama before using AI Studio commands.
+
+### Using Any Other OpenAI-Compatible Endpoint
+
+Select `OpenAI` as the provider and change the **API Endpoint** to your private or self-hosted URL (e.g. `https://llm.internal/api/v1`). Enter the API key issued by that gateway and set the appropriate model name.
 
 ## Command Cheat Sheet
 

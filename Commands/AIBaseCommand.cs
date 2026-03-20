@@ -1,4 +1,5 @@
-﻿using EnvDTE;
+﻿using AI_Studio.Helpers;
+using EnvDTE;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.AI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,9 +28,10 @@ namespace AI_Studio
         {
             var generalOptions = await General.GetLiveInstanceAsync();
 
-            if (string.IsNullOrEmpty(generalOptions.ApiKey))
+            if (ChatClientFactory.RequiresApiKey(generalOptions.Provider) && string.IsNullOrEmpty(generalOptions.ApiKey))
             {
-                await VS.MessageBox.ShowAsync("API Key is missing, go to Tools/Options/AI Studio/General and add the API Key created from https://platform.openai.com/account/api-keys",
+                await VS.MessageBox.ShowAsync(
+                    $"API Key is missing for {generalOptions.Provider}. Go to Tools > Options > AI Studio > General to add your API key.",
                     buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
 
                 Package.ShowOptionPage(typeof(General));
@@ -118,14 +119,7 @@ namespace AI_Studio
                 messages.Add(new(ChatRole.User, input));
             }
 
-            IChatClient client = new OpenAI.Chat.ChatClient(
-                model: generalOptions.LanguageModel,
-                credential: new ApiKeyCredential(generalOptions.ApiKey),
-                options: new OpenAI.OpenAIClientOptions
-                {
-                    Endpoint = new Uri(generalOptions.ApiEndpoint)
-                }
-            ).AsIChatClient();
+            IChatClient client = ChatClientFactory.Create(generalOptions);
 
             try
             {
