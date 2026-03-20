@@ -1,10 +1,10 @@
+using AI_Studio.Helpers;
 using Markdig;
 using Markdown.ColorCode;
 using Microsoft.Extensions.AI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.ClientModel;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -92,21 +92,15 @@ namespace AI_Studio
             {
                 var generalOptions = await General.GetLiveInstanceAsync();
 
-                if (string.IsNullOrWhiteSpace(generalOptions.ApiKey))
+                if (ChatClientFactory.RequiresApiKey(generalOptions.Provider) && string.IsNullOrWhiteSpace(generalOptions.ApiKey))
                 {
-                    await VS.MessageBox.ShowAsync("Add an API key in Tools > Options > AI Studio > General before continuing.",
+                    await VS.MessageBox.ShowAsync(
+                        $"Add an API key for {generalOptions.Provider} in Tools > Options > AI Studio > General before continuing.",
                         buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
                     return;
                 }
 
-                IChatClient client = new OpenAI.Chat.ChatClient(
-                    model: generalOptions.LanguageModel,
-                    credential: new ApiKeyCredential(generalOptions.ApiKey),
-                    options: new OpenAI.OpenAIClientOptions
-                    {
-                        Endpoint = new Uri(generalOptions.ApiEndpoint)
-                    }
-                ).AsIChatClient();
+                IChatClient client = ChatClientFactory.Create(generalOptions);
 
                 var requestMessages = new List<ChatMessage>
                 {
