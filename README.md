@@ -57,7 +57,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 2. **Configure AI Studio** via `Tools > Options > AI Studio > General`: set the **AI Provider**, paste the key, and enter the model name.
 3. **Pick a feature** (for example, Code It) by selecting code, right-clicking, and choosing the desired AI Studio command.
 
-![Configuration Screenshot](https://github.com/user-attachments/assets/3d50b0f4-b127-48ed-892d-94db90d4ca02)
+![Configuration Screenshot](https://github.com/user-attachments/assets/ca2b6228-23a9-44fd-8a82-0ee6aca8bd66)
 
 ## Provider Setup
 
