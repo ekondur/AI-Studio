@@ -25,7 +25,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 ## Highlights
 
 - Seamless right-click workflow across C#, XAML, and most text-based files inside Visual Studio.
-- Supports **OpenAI**, **Anthropic (Claude)**, and **Ollama** (local models) — switch provider from the Options page.
+- Supports **OpenAI**, **Anthropic (Claude)**, and **Ollama** (local or cloud) — switch provider from the Options page.
 - Generates or updates code while preserving formatting, documentation, and project conventions.
 - Built-in commands for documentation, explanations, security review, and unit test creation keep teams in flow.
 - Integrated Output tool window now supports follow-up chat with a VS-themed input bar and smooth streaming updates without focus jumps.
@@ -33,7 +33,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 ## Requirements
 
 - Visual Studio 2022 17.6 or later with the VSIX extension workload installed.
-- An API key for your chosen provider (not required for Ollama) with network access from the IDE.
+- An API key for your chosen provider (not required for local Ollama) with network access from the IDE.
 - .NET Framework 4.8 SDK (installed with Visual Studio) for local builds.
 
 ## Installation
@@ -78,21 +78,34 @@ AI Studio supports three providers out of the box. Switch between them at any ti
 | --- | --- |
 | AI Provider | `Anthropic` |
 | API Key | Your key from [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
-| Language Model | e.g. `claude-sonnet-4-5`, `claude-opus-4-5`, `claude-haiku-4-5` |
-| API Endpoint | *(not used — handled by the SDK)* |
+| Language Model | e.g. `claude-sonnet-4-6`, `claude-opus-4-6`, `claude-haiku-4-5` |
+| API Endpoint | *(not used — hardcoded to `https://api.anthropic.com/v1/messages`)* |
 
-### Ollama (local models, no API key required)
+### Ollama
 
-[Ollama](https://ollama.com) runs models locally on your machine. No API key or internet access is required.
+[Ollama](https://ollama.com) can run models locally on your machine or via the Ollama cloud.
+
+#### Local
 
 | Setting | Value |
 | --- | --- |
 | AI Provider | `Ollama` |
 | API Key | *(leave empty)* |
 | Language Model | e.g. `llama3.2`, `mistral`, `codestral` |
-| API Endpoint | `http://localhost:11434/v1/` (default) |
+| API Endpoint | `http://localhost:11434` |
 
 Pull a model first with `ollama pull llama3.2`, then start Ollama before using AI Studio commands.
+
+#### Cloud
+
+| Setting | Value |
+| --- | --- |
+| AI Provider | `Ollama` |
+| API Key | Your key from [ollama.com](https://ollama.com) *(if required)* |
+| Language Model | e.g. `mistral`, `llama3.2` |
+| API Endpoint | `https://ollama.com` |
+
+> AI Studio uses Ollama's native `/api/chat` endpoint. The endpoint field should be the **base URL only** — do not include `/api` or any path suffix.
 
 ### Using Any Other OpenAI-Compatible Endpoint
 

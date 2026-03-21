@@ -73,7 +73,12 @@ namespace AI_Studio.Helpers
 
             using var response = await _http.SendAsync(
                 request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException(
+                    $"API error {(int)response.StatusCode} ({response.ReasonPhrase}) at {_completionsUrl}: {errorBody}");
+            }
 
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream, Encoding.UTF8);
