@@ -5,7 +5,7 @@
         <DisplayName>AI Studio</DisplayName>
         <Description xml:space="preserve">Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more, right from the right-click menu.</Description>
         <License>License.txt</License>
-        <ReleaseNotes>https://github.com/ekondur/AI-Studio/releases/tag/v2.5.0</ReleaseNotes>
+        <ReleaseNotes>https://github.com/ekondur/AI-Studio/releases/tag/v2.6.0</ReleaseNotes>
         <Icon>Resources\Icon.png</Icon>
         <PreviewImage>Resources\Icon.png</PreviewImage>
         <Tags>AI, UnitTest, Refactor, Summary, OpenAI, Ollama, Claude</Tags>

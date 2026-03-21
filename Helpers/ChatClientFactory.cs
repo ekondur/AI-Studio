@@ -14,10 +14,10 @@ namespace AI_Studio.Helpers
                         model: options.LanguageModel);
 
                 case AIProvider.Ollama:
-                    return new OpenAIChatClient(
+                    return new OllamaChatClient(
                         model: options.LanguageModel,
-                        apiKey: string.Empty,
-                        endpoint: options.ApiEndpoint);
+                        baseEndpoint: options.ApiEndpoint,
+                        apiKey: options.ApiKey);
 
                 default: // AIProvider.OpenAI
                     return new OpenAIChatClient(

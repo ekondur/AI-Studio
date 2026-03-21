@@ -28,13 +28,13 @@ namespace AI_Studio
 
         [Category("General")]
         [DisplayName("Language Model")]
-        [Description("Model name to use. OpenAI examples: gpt-4o-mini, gpt-4o, o4-mini. Anthropic examples: claude-sonnet-4-5, claude-opus-4-5. Ollama examples: llama3.2, mistral, codestral.")]
+        [Description("Model name to use. OpenAI examples: gpt-4o-mini, gpt-4o, o4-mini. Anthropic examples: claude-sonnet-4-6, claude-opus-4-6, claude-haiku-4-5. Ollama examples: llama3.2, mistral, codestral.")]
         [DefaultValue("gpt-4o-mini")]
         public string LanguageModel { get; set; } = "gpt-4o-mini";
 
         [Category("General")]
         [DisplayName("API Endpoint")]
-        [Description("Base URL for the API. OpenAI: https://api.openai.com/v1/  Ollama: http://localhost:11434/v1/  Not used for Anthropic.")]
+        [Description("Base URL for the API. OpenAI: https://api.openai.com/v1/  Ollama local: http://localhost:11434  Ollama cloud: https://ollama.com  Not used for Anthropic.")]
         [DefaultValue("https://api.openai.com/v1/")]
         public string ApiEndpoint { get; set; } = "https://api.openai.com/v1/";
 
