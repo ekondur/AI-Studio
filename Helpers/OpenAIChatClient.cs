@@ -23,7 +23,7 @@ namespace AI_Studio.Helpers
     internal sealed class OpenAIChatClient : IChatClient
     {
         private readonly ChatClient _chatClient;
-        private readonly HttpClient _http;
+        private static readonly HttpClient _http = new HttpClient();
         private readonly string _model;
         private readonly string _apiKey;
         private readonly string _completionsUrl;
@@ -41,8 +41,6 @@ namespace AI_Studio.Helpers
                 : new ApiKeyCredential(apiKey);
             _chatClient = new ChatClient(model: model, credential: credential,
                 options: new OpenAI.OpenAIClientOptions { Endpoint = new Uri(baseUrl) });
-
-            _http = new HttpClient();
         }
 
         public async Task<ChatResponse> GetResponseAsync(
@@ -72,20 +70,20 @@ namespace AI_Studio.Helpers
                 request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + _apiKey);
 
             using var response = await _http.SendAsync(
-                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                var errorBody = await response.Content.ReadAsStringAsync();
+                var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 throw new HttpRequestException(
                     $"API error {(int)response.StatusCode} ({response.ReasonPhrase}) at {_completionsUrl}: {errorBody}");
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             using var reader = new StreamReader(stream, Encoding.UTF8);
 
             while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data: ")) continue;
 
                 var data = line.Substring(6).Trim();
@@ -101,7 +99,7 @@ namespace AI_Studio.Helpers
                     if (!delta.TryGetProperty("content", out var contentEl)) continue;
                     content = contentEl.GetString();
                 }
-                catch { continue; }
+                catch (JsonException) { continue; }
 
                 if (string.IsNullOrEmpty(content)) continue;
 
@@ -111,7 +109,7 @@ namespace AI_Studio.Helpers
             }
         }
 
-        public void Dispose() => _http.Dispose();
+        public void Dispose() { }
 
         public object GetService(Type serviceType, object key = null) => null;
 

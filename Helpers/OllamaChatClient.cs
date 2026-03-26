@@ -17,7 +17,7 @@ namespace AI_Studio.Helpers
     /// </summary>
     internal sealed class OllamaChatClient : IChatClient
     {
-        private readonly HttpClient _http;
+        private static readonly HttpClient _http = new HttpClient();
         private readonly string _model;
         private readonly string _chatUrl;
         private readonly string _apiKey;
@@ -26,7 +26,6 @@ namespace AI_Studio.Helpers
         {
             _model = model;
             _apiKey = apiKey;
-            _http = new HttpClient();
 
             // Normalize: strip trailing slash and any trailing /api suffix, then append /api/chat.
             // This accepts both "https://ollama.com" and "https://ollama.com/api" as input.
@@ -75,15 +74,15 @@ namespace AI_Studio.Helpers
                 request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + _apiKey);
 
             using var response = await _http.SendAsync(
-                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            await ThrowIfFailedAsync(response);
+                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            await ThrowIfFailedAsync(response).ConfigureAwait(false);
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             using var reader = new System.IO.StreamReader(stream, Encoding.UTF8);
 
             while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
                 string content = null;
@@ -102,7 +101,7 @@ namespace AI_Studio.Helpers
                         content = contentEl.GetString();
                     }
                 }
-                catch { continue; }
+                catch (JsonException) { continue; }
 
                 if (!string.IsNullOrEmpty(content))
                 {
@@ -115,7 +114,7 @@ namespace AI_Studio.Helpers
             }
         }
 
-        public void Dispose() => _http.Dispose();
+        public void Dispose() { }
 
         public object GetService(Type serviceType, object key = null) => null;
 

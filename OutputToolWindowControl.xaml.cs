@@ -1,92 +1,118 @@
 using AI_Studio.Helpers;
-using Markdig;
-using Markdown.ColorCode;
 using Microsoft.Extensions.AI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+using Microsoft.VisualStudio.Threading;
+using System.Threading.Tasks;
 
 namespace AI_Studio
 {
-    /// <summary>
-    /// Interaction logic for OutputToolWindowControl.xaml
-    /// </summary>
     public partial class OutputToolWindowControl : UserControl
     {
-        private readonly MarkdownPipeline _markdownPipeline;
-        private readonly List<ChatMessage> _conversation = new();
+        private enum ViewState { Empty, Content }
+
+        private readonly List<ChatMessage> _conversation = new List<ChatMessage>();
         private bool _isSending;
-        private bool _isBrowserReady;
-        private string _pendingInnerHtml = string.Empty;
+        private bool _showLoadingBubble;
+        private Border _streamingBubble;
+        private DateTime _lastStreamRenderTime = DateTime.MinValue;
+        private const int StreamRenderThrottleMs = 80;
+
+        // VS theme brushes — resolved once after the control is loaded
+        private Brush _textBrush;
+        private Brush _windowBrush;
 
         public OutputToolWindowControl()
         {
             InitializeComponent();
-
-            _markdownPipeline = new MarkdownPipelineBuilder()
-               .UseAdvancedExtensions()
-               .UseColorCode()
-               .Build();
-
+            Loaded += OnLoaded;
             SendButton.Click += OnSendButtonClick;
             PromptInput.KeyDown += PromptInput_KeyDown;
-            ResponseBrowser.LoadCompleted += ResponseBrowser_LoadCompleted;
-
-            // Prime the browser once; later updates reuse the same document to avoid focus jumps.
-            ResponseBrowser.NavigateToString(BuildPageHtml(string.Empty));
         }
 
-        private void ResponseBrowser_LoadCompleted(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            _isBrowserReady = true;
-            if (!string.IsNullOrEmpty(_pendingInnerHtml))
-            {
-                ApplyContent(_pendingInnerHtml);
-            }
+            _textBrush   = TryFindResource("VsBrush.WindowText")        as Brush ?? Brushes.WhiteSmoke;
+            _windowBrush = TryFindResource("VsBrush.Window")            as Brush ?? Brushes.Transparent;
         }
+
+        // ── Public API (called from AIBaseCommand) ────────────────────────────
+
+        public async Task BeginStreamingAsync()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            _conversation.Clear();
+            _showLoadingBubble = true;
+            _streamingBubble = null;
+            RebuildPanel();
+        }
+
+        public async Task UpdateContentAsync(string content, bool isStreaming = false)
+        {
+            if (isStreaming)
+            {
+                var elapsed = (DateTime.UtcNow - _lastStreamRenderTime).TotalMilliseconds;
+                if (elapsed < StreamRenderThrottleMs)
+                    return;
+            }
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            _showLoadingBubble = false;
+            var safeContent = string.IsNullOrWhiteSpace(content) ? "(No response returned.)" : content;
+            _conversation.Clear();
+            _conversation.Add(new ChatMessage(ChatRole.Assistant, safeContent));
+            _streamingBubble = null;
+            RebuildPanel();
+        }
+
+        // ── Chat send ─────────────────────────────────────────────────────────
 
         private void OnSendButtonClick(object sender, RoutedEventArgs e)
         {
             _ = ThreadHelper.JoinableTaskFactory.RunAsync(HandleSendAsync);
         }
 
-        public async Task UpdateContentAsync(string content)
+        private void PromptInput_KeyDown(object sender, KeyEventArgs e)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var safeContent = string.IsNullOrWhiteSpace(content) ? "(No response returned.)" : content;
-            _conversation.Clear();
-            _conversation.Add(new ChatMessage(ChatRole.Assistant, safeContent));
-
-            await RenderConversationAsync();
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                _ = ThreadHelper.JoinableTaskFactory.RunAsync(HandleSendAsync);
+            }
         }
 
         private async Task HandleSendAsync()
         {
             if (_isSending)
-            {
                 return;
-            }
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             var userMessage = PromptInput.Text.Trim();
             if (string.IsNullOrWhiteSpace(userMessage))
-            {
                 return;
-            }
 
             _isSending = true;
             PromptInput.Text = string.Empty;
             PromptInput.IsEnabled = false;
+            SendButton.Content = "•••";
             SendButton.IsEnabled = false;
 
             _conversation.Add(new ChatMessage(ChatRole.User, userMessage));
-            await RenderConversationAsync();
+            _showLoadingBubble = true;
+            _streamingBubble = null;
+            RebuildPanel();
 
             try
             {
@@ -95,7 +121,7 @@ namespace AI_Studio
                 if (ChatClientFactory.RequiresApiKey(generalOptions.Provider) && string.IsNullOrWhiteSpace(generalOptions.ApiKey))
                 {
                     await VS.MessageBox.ShowAsync(
-                        $"Add an API key for {generalOptions.Provider} in Tools > Options > AI Studio > General before continuing.",
+                        $"Add an API key for {generalOptions.Provider} in Tools > Options > AI Studio > General.",
                         buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
                     return;
                 }
@@ -104,7 +130,8 @@ namespace AI_Studio
 
                 var requestMessages = new List<ChatMessage>
                 {
-                    new ChatMessage(ChatRole.System, "You are AI Studio inside Visual Studio. Respond with concise, markdown-formatted answers suited for developers.")
+                    new ChatMessage(ChatRole.System,
+                        "You are AI Studio inside Visual Studio. Respond with concise, markdown-formatted answers suited for developers.")
                 };
                 requestMessages.AddRange(_conversation);
 
@@ -113,12 +140,10 @@ namespace AI_Studio
                 await foreach (var update in client.GetStreamingResponseAsync(requestMessages))
                 {
                     if (string.IsNullOrEmpty(update?.Text))
-                    {
                         continue;
-                    }
 
                     responseBuilder.Append(update.Text);
-                    await RenderConversationAsync(responseBuilder.ToString());
+                    await UpdateStreamingBubbleAsync(responseBuilder.ToString());
                 }
 
                 var assistantMessage = responseBuilder.Length == 0
@@ -126,7 +151,10 @@ namespace AI_Studio
                     : responseBuilder.ToString();
 
                 _conversation.Add(new ChatMessage(ChatRole.Assistant, assistantMessage));
-                await RenderConversationAsync();
+                _streamingBubble = null;
+                _showLoadingBubble = false;
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                RebuildPanel();
             }
             catch (Exception ex)
             {
@@ -135,220 +163,373 @@ namespace AI_Studio
             finally
             {
                 _isSending = false;
+                _showLoadingBubble = false;
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                SetViewState(_conversation.Count > 0 ? ViewState.Content : ViewState.Empty);
                 PromptInput.IsEnabled = true;
+                SendButton.Content = "Send";
                 SendButton.IsEnabled = true;
                 PromptInput.Focus();
             }
         }
 
-        private void PromptInput_KeyDown(object sender, KeyEventArgs e)
+        // ── Streaming bubble ──────────────────────────────────────────────────
+
+        private async Task UpdateStreamingBubbleAsync(string markdown)
         {
-            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                e.Handled = true;
-                _ = HandleSendAsync();
-            }
-        }
-
-        private async Task RenderConversationAsync(string streamingAssistant = null)
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var bodyBuilder = new StringBuilder();
-            foreach (var message in _conversation)
-            {
-                var roleClass = message.Role == ChatRole.User ? "user" : "assistant";
-                var roleName = message.Role == ChatRole.User ? "You" : "AI";
-                var html = Markdig.Markdown.ToHtml(message.Text ?? string.Empty, _markdownPipeline);
-                bodyBuilder.AppendLine($"<div class=\"message {roleClass}\"><div class=\"role\">{roleName}</div><div class=\"content\">{html}</div></div>");
-            }
-
-            if (!string.IsNullOrEmpty(streamingAssistant))
-            {
-                var streamingHtml = Markdig.Markdown.ToHtml(streamingAssistant, _markdownPipeline);
-                bodyBuilder.AppendLine($"<div class=\"message assistant live\"><div class=\"role\">AI</div><div class=\"content\">{streamingHtml}</div></div>");
-            }
-
-            UpdateBrowserContent(bodyBuilder.ToString());
-        }
-
-        private void UpdateBrowserContent(string innerHtml)
-        {
-            _pendingInnerHtml = innerHtml;
-
-            if (!_isBrowserReady || ResponseBrowser.Document == null)
-            {
-                ResponseBrowser.NavigateToString(BuildPageHtml(innerHtml));
+            var elapsed = (DateTime.UtcNow - _lastStreamRenderTime).TotalMilliseconds;
+            if (elapsed < StreamRenderThrottleMs)
                 return;
-            }
 
-            ApplyContent(innerHtml);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            _lastStreamRenderTime = DateTime.UtcNow;
+            _showLoadingBubble = false;
+
+            if (_streamingBubble == null)
+            {
+                RebuildPanel(streamingMarkdown: markdown);
+            }
+            else
+            {
+                UpdateStreamingBubbleContent(markdown);
+                ScrollToBottom();
+            }
         }
 
-        private void ApplyContent(string innerHtml)
+        private void UpdateStreamingBubbleContent(string markdown)
         {
-            try
+            if (_streamingBubble?.Child is StackPanel sp && sp.Children.Count >= 2)
             {
-                dynamic doc = ResponseBrowser.Document;
-                dynamic window = doc?.parentWindow;
-
-                if (window?.setContent != null)
+                var contentPanel = sp.Children[1] as StackPanel;
+                if (contentPanel != null)
                 {
-                    window.setContent(innerHtml);
-                    return;
-                }
-
-                dynamic log = doc?.getElementById("log");
-                if (log != null)
-                {
-                    log.innerHTML = innerHtml;
-                    window?.scrollTo(0, doc?.body?.scrollHeight ?? 0);
-                    return;
+                    contentPanel.Children.Clear();
+                    RenderMarkdownInto(contentPanel, markdown);
                 }
             }
-            catch
-            {
-                // Fallback to navigation below.
-            }
-
-            ResponseBrowser.NavigateToString(BuildPageHtml(innerHtml));
         }
 
-        private string BuildPageHtml(string innerContent)
+        // ── Panel rendering ───────────────────────────────────────────────────
+
+        private void RebuildPanel(string streamingMarkdown = null)
         {
-            return $@"<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=""utf-8"" />
-    <style>
-        :root {{
-            color-scheme: light dark;
-        }}
-        body {{
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 14px;
-            line-height: 1.5;
-            background: #1b1b1d;
-            color: #f3f3f3;
-        }}
-        .container {{
-            padding: 12px 16px 20px 16px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }}
-        @media (prefers-color-scheme: light) {{
-            body {{
-                background: #ffffff;
-                color: #1e1e1e;
-            }}
-            pre code {{
-                background: #f6f8fa;
-                color: #1e1e1e;
-            }}
-            blockquote {{
-                border-left-color: #d0d7de;
-            }}
-            table, th, td {{
-                border-color: #d0d7de;
-            }}
-            .message {{
-                background: #f5f7fb;
-                border-color: #d0d7de;
-            }}
-            .message.user {{
-                background: #e8f1ff;
-                border-color: #b7cff9;
-            }}
-        }}
-        .message {{
-            margin: 0 0 12px 0;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #3c3c3c;
-            background: #232323;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.35);
-        }}
-        .message.user {{
-            background: #11385a;
-            border-color: #2d5f8a;
-        }}
-        .message.assistant.live {{
-            opacity: 0.9;
-        }}
-        .role {{
-            font-size: 11px;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            color: #9ca3af;
-            margin-bottom: 6px;
-        }}
-        .content p {{
-            margin: 0 0 0.75em 0;
-        }}
-        pre {{
-            overflow-x: auto;
-        }}
-        pre code {{
-            display: block;
-            padding: 12px;
-            border-radius: 6px;
-            background: #252526;
-            color: #f3f3f3;
-            font-family: Consolas, 'Courier New', monospace;
-            font-size: 13px;
-        }}
-        code {{
-            font-family: Consolas, 'Courier New', monospace;
-            background: rgba(255,255,255,0.08);
-            padding: 0 3px;
-            border-radius: 3px;
-        }}
-        blockquote {{
-            margin: 0 0 12px 0;
-            padding: 8px 12px;
-            border-left: 4px solid #3c3c3c;
-            background: rgba(255,255,255,0.04);
-        }}
-        table {{
-            border-collapse: collapse;
-            margin: 12px 0;
-            width: 100%;
-        }}
-        th, td {{
-            border: 1px solid #3c3c3c;
-            padding: 6px 8px;
-            text-align: left;
-        }}
-        a {{
-            color: #4aa3ff;
-            text-decoration: none;
-        }}
-        a:hover {{
-            text-decoration: underline;
-        }}
-        h1, h2, h3, h4, h5, h6 {{
-            margin-top: 1.4em;
-            margin-bottom: 0.6em;
-        }}
-    </style>
-</head>
-<body>
-<div id=""log"" class=""container"">
-{innerContent}
-</div>
-<script>
-    function setContent(html) {{
-        var log = document.getElementById('log');
-        if (!log) return;
-        log.innerHTML = html;
-        window.scrollTo(0, document.body.scrollHeight);
-    }}
-</script>
-</body>
-</html>";
+            ConversationPanel.Children.Clear();
+            _streamingBubble = null;
+
+            foreach (var msg in _conversation)
+            {
+                var bubble = CreateMessageBubble(msg.Role == ChatRole.User, msg.Text ?? string.Empty);
+                ConversationPanel.Children.Add(bubble);
+            }
+
+            if (!string.IsNullOrEmpty(streamingMarkdown))
+            {
+                _showLoadingBubble = false;
+                _streamingBubble = CreateMessageBubble(isUser: false, markdown: streamingMarkdown, isStreaming: true);
+                ConversationPanel.Children.Add(_streamingBubble);
+                SetViewState(ViewState.Content);
+            }
+            else if (_showLoadingBubble)
+            {
+                ConversationPanel.Children.Add(CreateLoadingBubble());
+                SetViewState(ViewState.Content);
+            }
+            else
+            {
+                SetViewState(_conversation.Count > 0 ? ViewState.Content : ViewState.Empty);
+            }
+
+            ScrollToBottom();
+        }
+
+        private Border CreateMessageBubble(bool isUser, string markdown, bool isStreaming = false)
+        {
+            var roleLabel = new TextBlock
+            {
+                Text = isUser ? "You" : "AI",
+                FontSize = 10,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                Margin = new Thickness(0, 0, 0, 5),
+            };
+
+            var contentPanel = new StackPanel();
+            RenderMarkdownInto(contentPanel, markdown);
+
+            var innerStack = new StackPanel();
+            innerStack.Children.Add(roleLabel);
+            innerStack.Children.Add(contentPanel);
+
+            return new Border
+            {
+                Child = innerStack,
+                CornerRadius = new CornerRadius(8),
+                Background = isUser
+                    ? new SolidColorBrush(Color.FromRgb(0x1c, 0x45, 0x6b))
+                    : new SolidColorBrush(Color.FromRgb(0x2d, 0x2d, 0x30)),
+                BorderBrush = isUser
+                    ? new SolidColorBrush(Color.FromRgb(0x2d, 0x5f, 0x8a))
+                    : new SolidColorBrush(Color.FromRgb(0x3c, 0x3c, 0x3c)),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(12, 10, 12, 10),
+                Margin = new Thickness(0, 0, 0, 10),
+                Opacity = isStreaming ? 0.9 : 1.0,
+            };
+        }
+
+        private UIElement CreateLoadingBubble()
+        {
+            var dotsPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
+
+            for (int i = 0; i < 3; i++)
+            {
+                var dot = new Ellipse
+                {
+                    Width = 7,
+                    Height = 7,
+                    Fill = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                    Margin = new Thickness(2, 0, 2, 0),
+                    Opacity = 0.3,
+                };
+
+                var anim = new DoubleAnimation
+                {
+                    From = 0.3,
+                    To = 1.0,
+                    Duration = TimeSpan.FromMilliseconds(600),
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    BeginTime = TimeSpan.FromMilliseconds(i * 160),
+                };
+                dot.BeginAnimation(OpacityProperty, anim);
+                dotsPanel.Children.Add(dot);
+            }
+
+            var roleLabel = new TextBlock
+            {
+                Text = "AI",
+                FontSize = 10,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                Margin = new Thickness(0, 0, 0, 5),
+            };
+
+            var inner = new StackPanel();
+            inner.Children.Add(roleLabel);
+            inner.Children.Add(dotsPanel);
+
+            return new Border
+            {
+                Child = inner,
+                CornerRadius = new CornerRadius(8),
+                Background = new SolidColorBrush(Color.FromRgb(0x2d, 0x2d, 0x30)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(0x3c, 0x3c, 0x3c)),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(12, 10, 12, 10),
+                Margin = new Thickness(0, 0, 0, 10),
+            };
+        }
+
+        // ── Markdown → WPF ────────────────────────────────────────────────────
+
+        // Matches fenced code blocks: ```[lang]\n...\n```
+        private static readonly Regex _codeBlockRegex = new Regex(
+            @"```[^\n]*\n([\s\S]*?)```", RegexOptions.Compiled);
+
+        // Matches **bold**, `inline code`, *italic*
+        private static readonly Regex _inlineRegex = new Regex(
+            @"\*\*(.+?)\*\*|`([^`]+)`|\*(.+?)\*", RegexOptions.Compiled);
+
+        private void RenderMarkdownInto(StackPanel panel, string markdown)
+        {
+            if (string.IsNullOrEmpty(markdown)) return;
+
+            // Split on fenced code blocks; capture groups are interleaved in result
+            var parts = _codeBlockRegex.Split(markdown);
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (i % 2 == 0)
+                    RenderTextSection(panel, parts[i]);
+                else
+                    RenderCodeBlock(panel, parts[i]);
+            }
+        }
+
+        private void RenderTextSection(StackPanel panel, string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            var buffer = new List<string>();
+
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("### "))
+                {
+                    FlushBuffer(panel, buffer);
+                    panel.Children.Add(MakeHeading(line.Substring(4), 14, FontWeights.SemiBold));
+                }
+                else if (line.StartsWith("## "))
+                {
+                    FlushBuffer(panel, buffer);
+                    panel.Children.Add(MakeHeading(line.Substring(3), 16, FontWeights.Bold));
+                }
+                else if (line.StartsWith("# "))
+                {
+                    FlushBuffer(panel, buffer);
+                    panel.Children.Add(MakeHeading(line.Substring(2), 18, FontWeights.Bold));
+                }
+                else if (line.StartsWith("- ") || line.StartsWith("* "))
+                {
+                    FlushBuffer(panel, buffer);
+                    panel.Children.Add(MakeBulletRow(line.Substring(2)));
+                }
+                else
+                {
+                    buffer.Add(line);
+                }
+            }
+
+            FlushBuffer(panel, buffer);
+        }
+
+        private void FlushBuffer(StackPanel panel, List<string> buffer)
+        {
+            if (buffer.Count == 0) return;
+
+            // Trim surrounding blank lines
+            int s = 0, e = buffer.Count - 1;
+            while (s <= e && string.IsNullOrWhiteSpace(buffer[s])) s++;
+            while (e >= s && string.IsNullOrWhiteSpace(buffer[e])) e--;
+
+            if (s <= e)
+            {
+                var joined = string.Join("\n", buffer.GetRange(s, e - s + 1));
+                if (!string.IsNullOrWhiteSpace(joined))
+                {
+                    var tb = MakeInlineTextBlock(joined);
+                    tb.Margin = new Thickness(0, 0, 0, 6);
+                    panel.Children.Add(tb);
+                }
+            }
+
+            buffer.Clear();
+        }
+
+        private TextBlock MakeHeading(string text, double size, FontWeight weight)
+        {
+            var tb = new TextBlock
+            {
+                FontSize = size,
+                FontWeight = weight,
+                Foreground = _textBrush ?? Brushes.WhiteSmoke,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 8, 0, 4),
+            };
+            AddInlines(tb.Inlines, text);
+            return tb;
+        }
+
+        private UIElement MakeBulletRow(string text)
+        {
+            var grid = new Grid { Margin = new Thickness(0, 0, 0, 2) };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var bullet = new TextBlock
+            {
+                Text = "•",
+                Foreground = _textBrush ?? Brushes.WhiteSmoke,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            Grid.SetColumn(bullet, 0);
+
+            var content = MakeInlineTextBlock(text);
+            Grid.SetColumn(content, 1);
+
+            grid.Children.Add(bullet);
+            grid.Children.Add(content);
+            return grid;
+        }
+
+        private void RenderCodeBlock(StackPanel panel, string code)
+        {
+            var tb = new TextBlock
+            {
+                Text = code.TrimEnd('\r', '\n'),
+                FontFamily = new FontFamily("Consolas, Courier New"),
+                FontSize = 12,
+                Foreground = new SolidColorBrush(Color.FromRgb(0xf3, 0xf3, 0xf3)),
+                TextWrapping = TextWrapping.Wrap,
+                Padding = new Thickness(10),
+            };
+
+            panel.Children.Add(new Border
+            {
+                Child = tb,
+                Background = new SolidColorBrush(Color.FromRgb(0x1e, 0x1e, 0x1e)),
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(0, 4, 0, 6),
+            });
+        }
+
+        private TextBlock MakeInlineTextBlock(string text)
+        {
+            var tb = new TextBlock
+            {
+                Foreground = _textBrush ?? Brushes.WhiteSmoke,
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 13,
+            };
+            AddInlines(tb.Inlines, text);
+            return tb;
+        }
+
+        private void AddInlines(InlineCollection inlines, string text)
+        {
+            int last = 0;
+            foreach (Match m in _inlineRegex.Matches(text))
+            {
+                if (m.Index > last)
+                    inlines.Add(new Run(text.Substring(last, m.Index - last)));
+
+                if (m.Groups[1].Success)                    // **bold**
+                {
+                    inlines.Add(new Bold(new Run(m.Groups[1].Value)));
+                }
+                else if (m.Groups[2].Success)               // `inline code`
+                {
+                    inlines.Add(new Run(m.Groups[2].Value)
+                    {
+                        FontFamily = new FontFamily("Consolas, Courier New"),
+                        FontSize = 12,
+                        Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255)),
+                    });
+                }
+                else if (m.Groups[3].Success)               // *italic*
+                {
+                    inlines.Add(new Italic(new Run(m.Groups[3].Value)));
+                }
+
+                last = m.Index + m.Length;
+            }
+
+            if (last < text.Length)
+                inlines.Add(new Run(text.Substring(last)));
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        private void SetViewState(ViewState state)
+        {
+            EmptyStatePanel.Visibility = state == ViewState.Empty ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ScrollToBottom()
+        {
+            ConversationScroll.UpdateLayout();
+            ConversationScroll.ScrollToBottom();
         }
     }
 }
