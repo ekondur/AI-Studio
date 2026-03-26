@@ -18,7 +18,7 @@ namespace AI_Studio.Helpers
         private const string MessagesUrl = "https://api.anthropic.com/v1/messages";
         private const int MaxTokens = 8096;
 
-        private readonly HttpClient _http;
+        private static readonly HttpClient _http = new HttpClient();
         private readonly string _apiKey;
         private readonly string _model;
 
@@ -26,7 +26,6 @@ namespace AI_Studio.Helpers
         {
             _apiKey = apiKey;
             _model = model;
-            _http = new HttpClient();
         }
 
         public async Task<ChatResponse> GetResponseAsync(
@@ -52,15 +51,15 @@ namespace AI_Studio.Helpers
             var requestJson = BuildRequestJson(chatMessages, stream: true);
             using var request = BuildHttpRequest(requestJson);
             using var response = await _http.SendAsync(
-                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            await ThrowIfFailedAsync(response);
+                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            await ThrowIfFailedAsync(response).ConfigureAwait(false);
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             using var reader = new StreamReader(stream, Encoding.UTF8);
 
             while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
             {
-                var line = await reader.ReadLineAsync();
+                var line = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data: ")) continue;
 
                 var data = line.Substring(6).Trim();
@@ -79,7 +78,7 @@ namespace AI_Studio.Helpers
                     if (!delta.TryGetProperty("text", out var textEl)) continue;
                     chunk = textEl.GetString();
                 }
-                catch { continue; }
+                catch (JsonException) { continue; }
 
                 if (string.IsNullOrEmpty(chunk)) continue;
 
@@ -89,7 +88,7 @@ namespace AI_Studio.Helpers
             }
         }
 
-        public void Dispose() => _http.Dispose();
+        public void Dispose() { }
 
         public object GetService(Type serviceType, object key = null) => null;
 
@@ -162,7 +161,7 @@ namespace AI_Studio.Helpers
                 }
                 return sb.ToString();
             }
-            catch
+            catch (JsonException)
             {
                 return string.Empty;
             }

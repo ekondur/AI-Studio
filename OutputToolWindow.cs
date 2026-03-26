@@ -27,9 +27,14 @@ namespace AI_Studio
             this.Content = _control;
         }
 
-        public async Task UpdateContentAsync(string content)
+        public async Task BeginStreamingAsync()
         {
-            await _control.UpdateContentAsync(content);
+            await _control.BeginStreamingAsync();
+        }
+
+        public async Task UpdateContentAsync(string content, bool isStreaming = false)
+        {
+            await _control.UpdateContentAsync(content, isStreaming);
         }
     }
 }

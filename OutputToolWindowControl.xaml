@@ -7,7 +7,6 @@
              d:DesignHeight="450"
              d:DesignWidth="800">
     <UserControl.Resources>
-        <!-- Subtle VS-friendly button -->
         <Style x:Key="VsButton" TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}" />
             <Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarGradientBegin}" />
@@ -20,8 +19,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Root"
-                                CornerRadius="4"
+                        <Border x:Name="Root" CornerRadius="4"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
@@ -36,7 +34,7 @@
                                 <Setter TargetName="Root" Property="Background" Value="{DynamicResource VsBrush.CommandBarGradientEnd}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.6" />
+                                <Setter Property="Opacity" Value="0.5" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -44,7 +42,6 @@
             </Setter>
         </Style>
 
-        <!-- Rounded input shell -->
         <Style x:Key="VsInputBorder" TargetType="Border">
             <Setter Property="CornerRadius" Value="6" />
             <Setter Property="Background" Value="{DynamicResource VsBrush.Window}" />
@@ -60,10 +57,41 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Padding="8,6,8,0">
-            <WebBrowser x:Name="ResponseBrowser" />
-        </Border>
+        <!-- Content area -->
+        <Grid Grid.Row="0">
 
+            <!-- Native WPF conversation list — no browser, no COM, no freeze -->
+            <ScrollViewer x:Name="ConversationScroll"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Focusable="False">
+                <StackPanel x:Name="ConversationPanel" Margin="8,6,8,6" />
+            </ScrollViewer>
+
+            <!-- Empty state: shown when there are no messages -->
+            <Grid x:Name="EmptyStatePanel">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Opacity="0.4">
+                    <TextBlock Text="AI Studio"
+                               FontSize="22"
+                               FontWeight="Light"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource VsBrush.WindowText}" />
+                    <TextBlock Margin="0,12,0,0"
+                               FontSize="12"
+                               TextAlignment="Center"
+                               LineHeight="22"
+                               Foreground="{DynamicResource VsBrush.WindowText}">
+                        Right-click selected code to run a command,<LineBreak />
+                        or type a question below.
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+        </Grid>
+
+        <!-- Input bar -->
         <Border Grid.Row="1"
                 Background="{DynamicResource VsBrush.ToolWindowBackground}"
                 BorderThickness="1,1,0,0"
@@ -89,13 +117,13 @@
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
                              SpellCheck.IsEnabled="True"
-                             ToolTip="Ask a follow-up question" />
+                             ToolTip="Ask a follow-up question (Enter to send)" />
                 </Border>
 
                 <Button x:Name="SendButton"
                         Grid.Column="1"
                         Margin="8,0,0,0"
-                        MinWidth="96"
+                        MinWidth="70"
                         VerticalAlignment="Center"
                         Content="Send"
                         Style="{StaticResource VsButton}" />
