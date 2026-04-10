@@ -1,8 +1,7 @@
 using AI_Studio.Helpers;
 using Microsoft.Extensions.AI;
-using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,7 +13,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.VisualStudio.Threading;
-using System.Threading.Tasks;
 
 namespace AI_Studio
 {
@@ -43,8 +41,41 @@ namespace AI_Studio
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            _textBrush   = TryFindResource("VsBrush.WindowText")        as Brush ?? Brushes.WhiteSmoke;
-            _windowBrush = TryFindResource("VsBrush.Window")            as Brush ?? Brushes.Transparent;
+            RefreshThemeBrushes();
+            VSColorTheme.ThemeChanged += OnVsThemeChanged;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            VSColorTheme.ThemeChanged -= OnVsThemeChanged;
+        }
+
+        private void RefreshThemeBrushes()
+        {
+            _textBrush   = TryFindResource("VsBrush.WindowText") as Brush ?? Brushes.WhiteSmoke;
+            _windowBrush = TryFindResource("VsBrush.Window")     as Brush ?? Brushes.Transparent;
+        }
+
+        private void OnVsThemeChanged(ThemeChangedEventArgs e)
+        {
+            _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                RefreshThemeBrushes();
+                RebuildPanel();
+            });
+        }
+
+        private bool IsDarkTheme()
+        {
+            if (_windowBrush is SolidColorBrush scb)
+            {
+                var c = scb.Color;
+                double lum = 0.2126 * c.R + 0.7152 * c.G + 0.0722 * c.B;
+                return lum < 128;
+            }
+            return true; // default to dark
         }
 
         // ── Public API (called from AIBaseCommand) ────────────────────────────
@@ -244,12 +275,16 @@ namespace AI_Studio
 
         private Border CreateMessageBubble(bool isUser, string markdown, bool isStreaming = false)
         {
+            bool dark = IsDarkTheme();
+            var mutedColor    = dark ? Color.FromRgb(0x9c, 0xa3, 0xaf) : Color.FromRgb(0x6b, 0x72, 0x80);
+            var copyBorderColor = dark ? Color.FromRgb(0x55, 0x55, 0x55) : Color.FromRgb(0xd1, 0xd5, 0xdb);
+
             var roleLabel = new TextBlock
             {
                 Text = isUser ? "You" : "AI",
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                Foreground = new SolidColorBrush(mutedColor),
                 VerticalAlignment = VerticalAlignment.Center,
             };
 
@@ -262,8 +297,8 @@ namespace AI_Studio
                 Cursor = Cursors.Hand,
                 Background = Brushes.Transparent,
                 BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
-                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                BorderBrush = new SolidColorBrush(copyBorderColor),
+                Foreground = new SolidColorBrush(mutedColor),
                 VerticalAlignment = VerticalAlignment.Center,
                 Focusable = false,
             };
@@ -297,11 +332,11 @@ namespace AI_Studio
                 Child = innerStack,
                 CornerRadius = new CornerRadius(8),
                 Background = isUser
-                    ? new SolidColorBrush(Color.FromRgb(0x1c, 0x45, 0x6b))
-                    : new SolidColorBrush(Color.FromRgb(0x2d, 0x2d, 0x30)),
+                    ? new SolidColorBrush(dark ? Color.FromRgb(0x1c, 0x45, 0x6b) : Color.FromRgb(0xdb, 0xe4, 0xfc))
+                    : new SolidColorBrush(dark ? Color.FromRgb(0x2d, 0x2d, 0x30) : Color.FromRgb(0xf3, 0xf4, 0xf6)),
                 BorderBrush = isUser
-                    ? new SolidColorBrush(Color.FromRgb(0x2d, 0x5f, 0x8a))
-                    : new SolidColorBrush(Color.FromRgb(0x3c, 0x3c, 0x3c)),
+                    ? new SolidColorBrush(dark ? Color.FromRgb(0x2d, 0x5f, 0x8a) : Color.FromRgb(0x93, 0xc5, 0xfd))
+                    : new SolidColorBrush(dark ? Color.FromRgb(0x3c, 0x3c, 0x3c) : Color.FromRgb(0xd1, 0xd5, 0xdb)),
                 BorderThickness = new Thickness(1),
                 Padding = new Thickness(12, 10, 12, 10),
                 Margin = new Thickness(0, 0, 0, 10),
@@ -312,6 +347,9 @@ namespace AI_Studio
 
         private UIElement CreateLoadingBubble()
         {
+            bool dark = IsDarkTheme();
+            var mutedColor = dark ? Color.FromRgb(0x9c, 0xa3, 0xaf) : Color.FromRgb(0x6b, 0x72, 0x80);
+
             var dotsPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
 
             for (int i = 0; i < 3; i++)
@@ -320,7 +358,7 @@ namespace AI_Studio
                 {
                     Width = 7,
                     Height = 7,
-                    Fill = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                    Fill = new SolidColorBrush(mutedColor),
                     Margin = new Thickness(2, 0, 2, 0),
                     Opacity = 0.3,
                 };
@@ -343,7 +381,7 @@ namespace AI_Studio
                 Text = "AI",
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                Foreground = new SolidColorBrush(mutedColor),
                 Margin = new Thickness(0, 0, 0, 5),
             };
 
@@ -355,8 +393,8 @@ namespace AI_Studio
             {
                 Child = inner,
                 CornerRadius = new CornerRadius(8),
-                Background = new SolidColorBrush(Color.FromRgb(0x2d, 0x2d, 0x30)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x3c, 0x3c, 0x3c)),
+                Background = new SolidColorBrush(dark ? Color.FromRgb(0x2d, 0x2d, 0x30) : Color.FromRgb(0xf3, 0xf4, 0xf6)),
+                BorderBrush = new SolidColorBrush(dark ? Color.FromRgb(0x3c, 0x3c, 0x3c) : Color.FromRgb(0xd1, 0xd5, 0xdb)),
                 BorderThickness = new Thickness(1),
                 Padding = new Thickness(12, 10, 12, 10),
                 Margin = new Thickness(0, 0, 0, 10),
@@ -480,6 +518,13 @@ namespace AI_Studio
 
         private void RenderCodeBlock(StackPanel panel, string code)
         {
+            bool dark = IsDarkTheme();
+            var codeTextColor  = dark ? Color.FromRgb(0xf3, 0xf3, 0xf3) : Color.FromRgb(0x1f, 0x29, 0x37);
+            var codeBgColor    = dark ? Color.FromRgb(0x1e, 0x1e, 0x1e) : Color.FromRgb(0xf0, 0xf0, 0xf0);
+            var copyBgColor    = dark ? Color.FromArgb(200, 0x3c, 0x3c, 0x3c) : Color.FromArgb(200, 0xe5, 0xe7, 0xeb);
+            var copyBorderColor = dark ? Color.FromRgb(0x55, 0x55, 0x55) : Color.FromRgb(0xd1, 0xd5, 0xdb);
+            var mutedColor     = dark ? Color.FromRgb(0x9c, 0xa3, 0xaf) : Color.FromRgb(0x6b, 0x72, 0x80);
+
             var codeText = code.TrimEnd('\r', '\n');
 
             var tb = new TextBox
@@ -487,7 +532,7 @@ namespace AI_Studio
                 Text = codeText,
                 FontFamily = new FontFamily("Consolas, Courier New"),
                 FontSize = 12,
-                Foreground = new SolidColorBrush(Color.FromRgb(0xf3, 0xf3, 0xf3)),
+                Foreground = new SolidColorBrush(codeTextColor),
                 TextWrapping = TextWrapping.Wrap,
                 Padding = new Thickness(10),
                 IsReadOnly = true,
@@ -502,10 +547,10 @@ namespace AI_Studio
                 FontSize = 10,
                 Padding = new Thickness(6, 2, 6, 2),
                 Cursor = Cursors.Hand,
-                Background = new SolidColorBrush(Color.FromArgb(200, 0x3c, 0x3c, 0x3c)),
+                Background = new SolidColorBrush(copyBgColor),
                 BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
-                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                BorderBrush = new SolidColorBrush(copyBorderColor),
+                Foreground = new SolidColorBrush(mutedColor),
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Top,
                 Margin = new Thickness(0, 6, 6, 0),
@@ -529,7 +574,7 @@ namespace AI_Studio
             panel.Children.Add(new Border
             {
                 Child = overlay,
-                Background = new SolidColorBrush(Color.FromRgb(0x1e, 0x1e, 0x1e)),
+                Background = new SolidColorBrush(codeBgColor),
                 CornerRadius = new CornerRadius(4),
                 Margin = new Thickness(0, 4, 0, 6),
             });
@@ -589,7 +634,9 @@ namespace AI_Studio
                     {
                         FontFamily = new FontFamily("Consolas, Courier New"),
                         FontSize = 12,
-                        Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255)),
+                        Background = IsDarkTheme()
+                            ? new SolidColorBrush(Color.FromArgb(50, 255, 255, 255))
+                            : new SolidColorBrush(Color.FromArgb(40, 0, 0, 0)),
                     });
                 }
                 else if (m.Groups[3].Success)               // *italic*
