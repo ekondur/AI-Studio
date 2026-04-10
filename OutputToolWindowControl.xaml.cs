@@ -250,15 +250,47 @@ namespace AI_Studio
                 FontSize = 10,
                 FontWeight = FontWeights.SemiBold,
                 Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
-                Margin = new Thickness(0, 0, 0, 5),
+                VerticalAlignment = VerticalAlignment.Center,
             };
+
+            // Copy button next to the role label
+            var copyButton = new Button
+            {
+                Content = "Copy",
+                FontSize = 10,
+                Padding = new Thickness(6, 1, 6, 1),
+                Cursor = Cursors.Hand,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                VerticalAlignment = VerticalAlignment.Center,
+                Focusable = false,
+            };
+            var capturedMarkdown = markdown;
+            copyButton.Click += (s, e) => Clipboard.SetText(capturedMarkdown);
+
+            // Header row: role label on the left, copy button on the right
+            var headerGrid = new Grid { Margin = new Thickness(0, 0, 0, 5) };
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            Grid.SetColumn(roleLabel, 0);
+            Grid.SetColumn(copyButton, 1);
+            headerGrid.Children.Add(roleLabel);
+            headerGrid.Children.Add(copyButton);
 
             var contentPanel = new StackPanel();
             RenderMarkdownInto(contentPanel, markdown);
 
             var innerStack = new StackPanel();
-            innerStack.Children.Add(roleLabel);
+            innerStack.Children.Add(headerGrid);
             innerStack.Children.Add(contentPanel);
+
+            // Right-click context menu
+            var contextMenu = new ContextMenu();
+            var copyMenuItem = new MenuItem { Header = "Copy" };
+            copyMenuItem.Click += (s, e) => Clipboard.SetText(capturedMarkdown);
+            contextMenu.Items.Add(copyMenuItem);
 
             return new Border
             {
@@ -274,6 +306,7 @@ namespace AI_Studio
                 Padding = new Thickness(12, 10, 12, 10),
                 Margin = new Thickness(0, 0, 0, 10),
                 Opacity = isStreaming ? 0.9 : 1.0,
+                ContextMenu = contextMenu,
             };
         }
 
@@ -417,18 +450,10 @@ namespace AI_Studio
             buffer.Clear();
         }
 
-        private TextBlock MakeHeading(string text, double size, FontWeight weight)
+        private FrameworkElement MakeHeading(string text, double size, FontWeight weight)
         {
-            var tb = new TextBlock
-            {
-                FontSize = size,
-                FontWeight = weight,
-                Foreground = _textBrush ?? Brushes.WhiteSmoke,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 8, 0, 4),
-            };
-            AddInlines(tb.Inlines, text);
-            return tb;
+            return MakeSelectableRtb(text, fontSize: size, fontWeight: weight,
+                                     margin: new Thickness(0, 8, 0, 4));
         }
 
         private UIElement MakeBulletRow(string text)
@@ -455,35 +480,95 @@ namespace AI_Studio
 
         private void RenderCodeBlock(StackPanel panel, string code)
         {
-            var tb = new TextBlock
+            var codeText = code.TrimEnd('\r', '\n');
+
+            var tb = new TextBox
             {
-                Text = code.TrimEnd('\r', '\n'),
+                Text = codeText,
                 FontFamily = new FontFamily("Consolas, Courier New"),
                 FontSize = 12,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xf3, 0xf3, 0xf3)),
                 TextWrapping = TextWrapping.Wrap,
                 Padding = new Thickness(10),
+                IsReadOnly = true,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                IsTabStop = false,
             };
+
+            var copyBtn = new Button
+            {
+                Content = "Copy",
+                FontSize = 10,
+                Padding = new Thickness(6, 2, 6, 2),
+                Cursor = Cursors.Hand,
+                Background = new SolidColorBrush(Color.FromArgb(200, 0x3c, 0x3c, 0x3c)),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf)),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 6, 6, 0),
+                Focusable = false,
+            };
+            copyBtn.Click += (s, e) =>
+            {
+                _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+                {
+                    Clipboard.SetText(codeText);
+                    copyBtn.Content = "Copied!";
+                    await Task.Delay(1500);
+                    copyBtn.Content = "Copy";
+                });
+            };
+
+            var overlay = new Grid();
+            overlay.Children.Add(tb);
+            overlay.Children.Add(copyBtn);
 
             panel.Children.Add(new Border
             {
-                Child = tb,
+                Child = overlay,
                 Background = new SolidColorBrush(Color.FromRgb(0x1e, 0x1e, 0x1e)),
                 CornerRadius = new CornerRadius(4),
                 Margin = new Thickness(0, 4, 0, 6),
             });
         }
 
-        private TextBlock MakeInlineTextBlock(string text)
+        private FrameworkElement MakeInlineTextBlock(string text)
         {
-            var tb = new TextBlock
+            return MakeSelectableRtb(text, fontSize: 13);
+        }
+
+        // Creates a read-only, transparent RichTextBox that supports text selection
+        // while preserving inline formatting (bold, italic, inline code).
+        private RichTextBox MakeSelectableRtb(string text, double fontSize = 13,
+                                              FontWeight? fontWeight = null,
+                                              Thickness? margin = null)
+        {
+            var para = new Paragraph { Margin = new Thickness(0) };
+            AddInlines(para.Inlines, text);
+
+            var doc = new FlowDocument(para) { PagePadding = new Thickness(0) };
+
+            var rtb = new RichTextBox(doc)
             {
+                IsReadOnly = true,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Padding = new Thickness(0),
+                FontSize = fontSize,
                 Foreground = _textBrush ?? Brushes.WhiteSmoke,
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 13,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                IsTabStop = false,
+                Margin = margin ?? new Thickness(0),
             };
-            AddInlines(tb.Inlines, text);
-            return tb;
+
+            if (fontWeight.HasValue)
+                rtb.FontWeight = fontWeight.Value;
+
+            return rtb;
         }
 
         private void AddInlines(InlineCollection inlines, string text)
