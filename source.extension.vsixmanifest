@@ -10,7 +10,7 @@
         <PreviewImage>Resources\Icon.png</PreviewImage>
         <Tags>AI, UnitTest, Refactor, Summary, OpenAI, Ollama, Claude</Tags>
     </Metadata>
-    <Installation AllUsers="true">
+    <Installation AllUsers="false">
         <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
