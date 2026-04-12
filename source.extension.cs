@@ -13,6 +13,6 @@ namespace AI_Studio
         public const string Language = "en-US";
         public const string Version = "2.6.2";
         public const string Author = "Emrah Kondur";
-        public const string Tags = "AI, UnitTest, Refactor, Summary, OpenAI, Ollama, Claude";
+        public const string Tags = "AI, UnitTest, Refactor, Summary, OpenAI, Azure AI, Ollama, Claude";
     }
 }

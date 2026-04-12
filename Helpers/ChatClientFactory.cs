@@ -8,6 +8,12 @@ namespace AI_Studio.Helpers
         {
             switch (options.Provider)
             {
+                case AIProvider.AzureAI:
+                    return new AzureAIChatClient(
+                        model: options.LanguageModel,
+                        apiKey: options.ApiKey,
+                        endpoint: options.ApiEndpoint);
+
                 case AIProvider.Anthropic:
                     return new AnthropicChatClient(
                         apiKey: options.ApiKey,
