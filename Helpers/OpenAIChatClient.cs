@@ -1,6 +1,5 @@
 using Microsoft.Extensions.AI;
 using OpenAI.Chat;
-using System;
 using System.ClientModel;
 using System.Collections.Generic;
 using System.IO;

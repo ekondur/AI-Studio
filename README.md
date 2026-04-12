@@ -25,7 +25,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 ## Highlights
 
 - Seamless right-click workflow across C#, XAML, and most text-based files inside Visual Studio.
-- Supports **OpenAI**, **Anthropic (Claude)**, and **Ollama** (local or cloud) — switch provider from the Options page.
+- Supports **OpenAI**, **Azure AI**, **Anthropic (Claude)**, and **Ollama** (local or cloud) — switch provider from the Options page.
 - Generates or updates code while preserving formatting, documentation, and project conventions.
 - Built-in commands for documentation, explanations, security review, and unit test creation keep teams in flow.
 - Integrated Output tool window now supports follow-up chat with a VS-themed input bar and smooth streaming updates without focus jumps.
@@ -54,14 +54,14 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 ## Quick Start
 
 1. **Choose a provider** and obtain an API key if required (see the [Provider Setup](#provider-setup) section below).
-2. **Configure AI Studio** via `Tools > Options > AI Studio > General`: set the **AI Provider**, paste the key, and enter the model name.
+2. **Configure AI Studio** via `Tools > Options > AI Studio > General`: set the **AI Provider**, paste the key, and enter the model or deployment name.
 3. **Pick a feature** (for example, Code It) by selecting code, right-clicking, and choosing the desired AI Studio command.
 
 ![Configuration Screenshot](https://github.com/user-attachments/assets/ca2b6228-23a9-44fd-8a82-0ee6aca8bd66)
 
 ## Provider Setup
 
-AI Studio supports three providers out of the box. Switch between them at any time under `Tools > Options > AI Studio > General`.
+AI Studio supports four providers out of the box. Switch between them at any time under `Tools > Options > AI Studio > General`.
 
 ### OpenAI
 
@@ -71,6 +71,19 @@ AI Studio supports three providers out of the box. Switch between them at any ti
 | API Key | Your key from [platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys) |
 | Language Model | e.g. `gpt-4o-mini`, `gpt-4o`, `o4-mini` |
 | API Endpoint | `https://api.openai.com/v1/` (default) |
+
+### Azure AI
+
+Use this provider for Azure AI Foundry or Azure OpenAI resources that expose the Azure `openai/v1` endpoint.
+
+| Setting | Value |
+| --- | --- |
+| AI Provider | `AzureAI` |
+| API Key | Your key from the Azure portal or Azure AI Foundry |
+| Language Model | The Azure model or deployment name, e.g. `gpt-4o-mini` |
+| API Endpoint | e.g. `https://your-resource.openai.azure.com/openai/v1/` |
+
+> Enter the Azure base URL only. AI Studio appends `/chat/completions` automatically.
 
 ### Anthropic (Claude)
 
@@ -191,7 +204,7 @@ All configuration lives under `Tools > Options > AI Studio`:
 ## Advanced Customization
 
 - **Custom prompts per command**: Tailor Refactor to focus on performance while Configure Comments to prioritize XML docs using `Tools > Options > AI Studio > Commands`.
-- **Bring your own endpoint**: Point the extension at Azure OpenAI, a private/self-hosted LLM gateway, or any OpenAI-compatible proxy by entering the base URL and model ID in the General page.
+- **Bring your own endpoint**: Point the extension at a private/self-hosted LLM gateway or any OpenAI-compatible proxy by entering the base URL and model ID in the General page.
 - **Formatting control**: Enable *Format changed text* to run Visual Studio formatting on every AI edit to keep diffs clean.
 - **Response behavior**: Decide whether AI should insert results inline, append to the Output window first, or prompt for confirmation.
 
@@ -200,7 +213,7 @@ All configuration lives under `Tools > Options > AI Studio`:
 ## Troubleshooting and Feedback
 
 - Verify your API key and quota if requests fail; the Output tool window surfaces errors returned by the provider.
-- Ensure Visual Studio can reach the OpenAI endpoint (corporate proxies may need to allowlist it).
+- Ensure Visual Studio can reach your provider endpoint (corporate proxies may need to allowlist it).
 - Capture screenshots/logs and [open an issue](https://github.com/ekondur/AI-Studio/issues) for bugs or ideas.
 - Contributions are welcome via pull requests; please include before/after screenshots for UI tweaks.
 

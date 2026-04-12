@@ -4,6 +4,7 @@ namespace AI_Studio
     {
         OpenAI,
         Anthropic,
-        Ollama
+        Ollama,
+        AzureAI
     }
 }

@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /.claude/settings.local.json
 /.vscode/settings.json
+/.claude/settings.json
+/.dotnet

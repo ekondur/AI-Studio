@@ -8,7 +8,7 @@
 		<ReleaseNotes>https://github.com/ekondur/AI-Studio/releases/tag/v2.6.2</ReleaseNotes>
 		<Icon>Resources\Icon.png</Icon>
 		<PreviewImage>Resources\Icon.png</PreviewImage>
-		<Tags>AI, UnitTest, Refactor, Summary, OpenAI, Ollama, Claude</Tags>
+		<Tags>AI, UnitTest, Refactor, Summary, OpenAI, Azure AI, Ollama, Claude</Tags>
 	</Metadata>
 	<Installation AllUsers="false">
 		<InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">

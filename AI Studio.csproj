@@ -55,6 +55,7 @@
     <Compile Include="Enums\AIProvider.cs" />
     <Compile Include="Enums\ResponseBehavior.cs" />
     <Compile Include="Helpers\AnthropicChatClient.cs" />
+    <Compile Include="Helpers\AzureAIChatClient.cs" />
     <Compile Include="Helpers\ChatClientFactory.cs" />
     <Compile Include="Helpers\OllamaChatClient.cs" />
     <Compile Include="Helpers\OpenAIChatClient.cs" />
