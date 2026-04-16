@@ -3,6 +3,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -407,9 +408,21 @@ namespace AI_Studio
         private static readonly Regex _codeBlockRegex = new Regex(
             @"```[^\n]*\n([\s\S]*?)```", RegexOptions.Compiled);
 
-        // Matches **bold**, `inline code`, *italic*
+        // Matches **bold**, `inline code`, ~~strikethrough~~, [link](url), *italic*
         private static readonly Regex _inlineRegex = new Regex(
-            @"\*\*(.+?)\*\*|`([^`]+)`|\*(.+?)\*", RegexOptions.Compiled);
+            @"\*\*(.+?)\*\*|`([^`]+)`|~~(.+?)~~|\[([^\]]+)\]\(([^)]+)\)|\*(.+?)\*", RegexOptions.Compiled);
+
+        private static readonly Regex _numberedListRegex = new Regex(
+            @"^(\s*)(\d+)\.\s+(.*)", RegexOptions.Compiled);
+
+        private static readonly Regex _nestedBulletRegex = new Regex(
+            @"^(\s{2,})[-*]\s+(.*)", RegexOptions.Compiled);
+
+        private static readonly Regex _horizontalRuleRegex = new Regex(
+            @"^\s*(?:---+|\*\*\*+|___+)\s*$", RegexOptions.Compiled);
+
+        private static readonly Regex _tableSeparatorRegex = new Regex(
+            @"^\|[\s:]*-+[\s:]*(\|[\s:]*-+[\s:]*)*\|?\s*$", RegexOptions.Compiled);
 
         private void RenderMarkdownInto(StackPanel panel, string markdown)
         {
@@ -433,10 +446,51 @@ namespace AI_Studio
 
             var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             var buffer = new List<string>();
+            var tableBuffer = new List<string>();
+            var blockquoteBuffer = new List<string>();
 
             foreach (var line in lines)
             {
-                if (line.StartsWith("### "))
+                // Table lines: start and end with |
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("|") && trimmed.EndsWith("|"))
+                {
+                    FlushBuffer(panel, buffer);
+                    FlushBlockquoteBuffer(panel, blockquoteBuffer);
+                    tableBuffer.Add(line);
+                    continue;
+                }
+                if (tableBuffer.Count > 0)
+                {
+                    RenderTable(panel, tableBuffer);
+                    tableBuffer.Clear();
+                }
+
+                // Blockquote lines
+                if (line.StartsWith("> ") || line == ">")
+                {
+                    FlushBuffer(panel, buffer);
+                    blockquoteBuffer.Add(line.Length > 2 ? line.Substring(2) : "");
+                    continue;
+                }
+                if (blockquoteBuffer.Count > 0)
+                {
+                    FlushBlockquoteBuffer(panel, blockquoteBuffer);
+                }
+
+                // Horizontal rule
+                if (_horizontalRuleRegex.IsMatch(line))
+                {
+                    FlushBuffer(panel, buffer);
+                    panel.Children.Add(MakeHorizontalRule());
+                }
+                // Headings
+                else if (line.StartsWith("#### "))
+                {
+                    FlushBuffer(panel, buffer);
+                    panel.Children.Add(MakeHeading(line.Substring(5), 13, FontWeights.SemiBold));
+                }
+                else if (line.StartsWith("### "))
                 {
                     FlushBuffer(panel, buffer);
                     panel.Children.Add(MakeHeading(line.Substring(4), 14, FontWeights.SemiBold));
@@ -451,10 +505,27 @@ namespace AI_Studio
                     FlushBuffer(panel, buffer);
                     panel.Children.Add(MakeHeading(line.Substring(2), 18, FontWeights.Bold));
                 }
+                // Unordered list (top level)
                 else if (line.StartsWith("- ") || line.StartsWith("* "))
                 {
                     FlushBuffer(panel, buffer);
                     panel.Children.Add(MakeBulletRow(line.Substring(2)));
+                }
+                // Nested unordered list
+                else if (_nestedBulletRegex.IsMatch(line))
+                {
+                    FlushBuffer(panel, buffer);
+                    var match = _nestedBulletRegex.Match(line);
+                    var indent = match.Groups[1].Value.Length / 2;
+                    panel.Children.Add(MakeBulletRow(match.Groups[2].Value, indent));
+                }
+                // Numbered list
+                else if (_numberedListRegex.IsMatch(line))
+                {
+                    FlushBuffer(panel, buffer);
+                    var match = _numberedListRegex.Match(line);
+                    var indent = match.Groups[1].Value.Length >= 2 ? match.Groups[1].Value.Length / 2 : 0;
+                    panel.Children.Add(MakeNumberedRow(match.Groups[2].Value, match.Groups[3].Value, indent));
                 }
                 else
                 {
@@ -462,6 +533,9 @@ namespace AI_Studio
                 }
             }
 
+            // Flush remaining buffers
+            if (tableBuffer.Count > 0) RenderTable(panel, tableBuffer);
+            FlushBlockquoteBuffer(panel, blockquoteBuffer);
             FlushBuffer(panel, buffer);
         }
 
@@ -488,15 +562,40 @@ namespace AI_Studio
             buffer.Clear();
         }
 
+        private void FlushBlockquoteBuffer(StackPanel panel, List<string> blockquoteBuffer)
+        {
+            if (blockquoteBuffer.Count == 0) return;
+
+            bool dark = IsDarkTheme();
+            var borderColor = dark ? Color.FromRgb(0x4a, 0x4a, 0x4a) : Color.FromRgb(0xd1, 0xd5, 0xdb);
+            var bgColor = dark ? Color.FromArgb(30, 255, 255, 255) : Color.FromArgb(20, 0, 0, 0);
+
+            var innerPanel = new StackPanel();
+            var joinedText = string.Join("\n", blockquoteBuffer);
+            RenderTextSection(innerPanel, joinedText);
+
+            panel.Children.Add(new Border
+            {
+                Child = innerPanel,
+                BorderBrush = new SolidColorBrush(borderColor),
+                BorderThickness = new Thickness(3, 0, 0, 0),
+                Background = new SolidColorBrush(bgColor),
+                Padding = new Thickness(12, 6, 12, 6),
+                Margin = new Thickness(0, 4, 0, 6),
+            });
+
+            blockquoteBuffer.Clear();
+        }
+
         private FrameworkElement MakeHeading(string text, double size, FontWeight weight)
         {
             return MakeSelectableRtb(text, fontSize: size, fontWeight: weight,
                                      margin: new Thickness(0, 8, 0, 4));
         }
 
-        private UIElement MakeBulletRow(string text)
+        private UIElement MakeBulletRow(string text, int indent = 0)
         {
-            var grid = new Grid { Margin = new Thickness(0, 0, 0, 2) };
+            var grid = new Grid { Margin = new Thickness(indent * 16, 0, 0, 2) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
@@ -514,6 +613,41 @@ namespace AI_Studio
             grid.Children.Add(bullet);
             grid.Children.Add(content);
             return grid;
+        }
+
+        private UIElement MakeNumberedRow(string number, string text, int indent = 0)
+        {
+            var grid = new Grid { Margin = new Thickness(indent * 16, 0, 0, 2) };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(24) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var numberBlock = new TextBlock
+            {
+                Text = number + ".",
+                Foreground = _textBrush ?? Brushes.WhiteSmoke,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            Grid.SetColumn(numberBlock, 0);
+
+            var content = MakeInlineTextBlock(text);
+            Grid.SetColumn(content, 1);
+
+            grid.Children.Add(numberBlock);
+            grid.Children.Add(content);
+            return grid;
+        }
+
+        private UIElement MakeHorizontalRule()
+        {
+            bool dark = IsDarkTheme();
+            return new Border
+            {
+                Height = 1,
+                Background = new SolidColorBrush(dark
+                    ? Color.FromRgb(0x4a, 0x4a, 0x4a)
+                    : Color.FromRgb(0xd1, 0xd5, 0xdb)),
+                Margin = new Thickness(0, 8, 0, 8),
+            };
         }
 
         private void RenderCodeBlock(StackPanel panel, string code)
@@ -580,6 +714,106 @@ namespace AI_Studio
             });
         }
 
+        private void RenderTable(StackPanel panel, List<string> tableLines)
+        {
+            if (tableLines.Count < 2)
+            {
+                // Not enough lines for a table — render as plain text
+                foreach (var line in tableLines)
+                {
+                    var tb = MakeInlineTextBlock(line);
+                    tb.Margin = new Thickness(0, 0, 0, 6);
+                    panel.Children.Add(tb);
+                }
+                return;
+            }
+
+            var rows = new List<string[]>();
+            int separatorIndex = -1;
+
+            for (int i = 0; i < tableLines.Count; i++)
+            {
+                var line = tableLines[i].Trim();
+                if (_tableSeparatorRegex.IsMatch(line))
+                {
+                    separatorIndex = i;
+                    continue;
+                }
+
+                var cells = ParseTableCells(line);
+                if (cells.Length > 0)
+                    rows.Add(cells);
+            }
+
+            if (rows.Count == 0) return;
+
+            int columnCount = rows.Max(r => r.Length);
+            bool hasHeader = separatorIndex == 1;
+
+            bool dark = IsDarkTheme();
+            var borderColor = dark ? Color.FromRgb(0x4a, 0x4a, 0x4a) : Color.FromRgb(0xd1, 0xd5, 0xdb);
+            var headerBg = dark ? Color.FromArgb(40, 255, 255, 255) : Color.FromArgb(30, 0, 0, 0);
+
+            var grid = new Grid();
+
+            for (int c = 0; c < columnCount; c++)
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            for (int r = 0; r < rows.Count; r++)
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            for (int r = 0; r < rows.Count; r++)
+            {
+                for (int c = 0; c < columnCount; c++)
+                {
+                    var cellText = c < rows[r].Length ? rows[r][c] : "";
+                    var cellContent = MakeInlineTextBlock(cellText);
+
+                    var cellBorder = new Border
+                    {
+                        Child = cellContent,
+                        BorderBrush = new SolidColorBrush(borderColor),
+                        BorderThickness = new Thickness(
+                            c == 0 ? 1 : 0,
+                            r == 0 ? 1 : 0,
+                            1,
+                            1),
+                        Padding = new Thickness(8, 4, 8, 4),
+                    };
+
+                    if (hasHeader && r == 0)
+                    {
+                        cellBorder.Background = new SolidColorBrush(headerBg);
+                        var rtb = cellContent as RichTextBox;
+                        if (rtb != null)
+                            rtb.FontWeight = FontWeights.SemiBold;
+                    }
+
+                    Grid.SetRow(cellBorder, r);
+                    Grid.SetColumn(cellBorder, c);
+                    grid.Children.Add(cellBorder);
+                }
+            }
+
+            panel.Children.Add(new Border
+            {
+                Child = grid,
+                Margin = new Thickness(0, 4, 0, 6),
+            });
+        }
+
+        private static string[] ParseTableCells(string line)
+        {
+            var trimmed = line.Trim();
+            if (!trimmed.StartsWith("|")) return new string[0];
+
+            trimmed = trimmed.Substring(1);
+            if (trimmed.EndsWith("|"))
+                trimmed = trimmed.Substring(0, trimmed.Length - 1);
+
+            return trimmed.Split('|').Select(c => c.Trim()).ToArray();
+        }
+
         private FrameworkElement MakeInlineTextBlock(string text)
         {
             return MakeSelectableRtb(text, fontSize: 13);
@@ -639,9 +873,42 @@ namespace AI_Studio
                             : new SolidColorBrush(Color.FromArgb(40, 0, 0, 0)),
                     });
                 }
-                else if (m.Groups[3].Success)               // *italic*
+                else if (m.Groups[3].Success)               // ~~strikethrough~~
                 {
-                    inlines.Add(new Italic(new Run(m.Groups[3].Value)));
+                    inlines.Add(new Run(m.Groups[3].Value)
+                    {
+                        TextDecorations = TextDecorations.Strikethrough,
+                    });
+                }
+                else if (m.Groups[4].Success)               // [link](url)
+                {
+                    var hyperlink = new Hyperlink(new Run(m.Groups[4].Value))
+                    {
+                        Foreground = new SolidColorBrush(IsDarkTheme()
+                            ? Color.FromRgb(0x58, 0xa6, 0xff)
+                            : Color.FromRgb(0x09, 0x69, 0xda)),
+                    };
+
+                    Uri uri;
+                    if (Uri.TryCreate(m.Groups[5].Value, UriKind.Absolute, out uri))
+                    {
+                        hyperlink.NavigateUri = uri;
+                        hyperlink.RequestNavigate += (s, e) =>
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = e.Uri.AbsoluteUri,
+                                UseShellExecute = true,
+                            });
+                            e.Handled = true;
+                        };
+                    }
+
+                    inlines.Add(hyperlink);
+                }
+                else if (m.Groups[6].Success)               // *italic*
+                {
+                    inlines.Add(new Italic(new Run(m.Groups[6].Value)));
                 }
 
                 last = m.Index + m.Length;
