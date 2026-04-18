@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,6 +29,10 @@ namespace AI_Studio
         private DateTime _lastStreamRenderTime = DateTime.MinValue;
         private const int StreamRenderThrottleMs = 80;
 
+        // Cancels the follow-up chat request started from this tool window.
+        // (Command-initiated streams are cancelled via RequestCancellationManager.)
+        private CancellationTokenSource _streamingCts;
+
         // VS theme brushes — resolved once after the control is loaded
         private Brush _textBrush;
         private Brush _windowBrush;
@@ -38,6 +43,7 @@ namespace AI_Studio
             Loaded += OnLoaded;
             SendButton.Click += OnSendButtonClick;
             PromptInput.KeyDown += PromptInput_KeyDown;
+            PreviewKeyDown += OnPreviewKeyDown;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -87,6 +93,7 @@ namespace AI_Studio
             _conversation.Clear();
             _showLoadingBubble = true;
             _streamingBubble = null;
+            SetStopButtonMode();
             RebuildPanel();
         }
 
@@ -97,6 +104,7 @@ namespace AI_Studio
                 var elapsed = (DateTime.UtcNow - _lastStreamRenderTime).TotalMilliseconds;
                 if (elapsed < StreamRenderThrottleMs)
                     return;
+                _lastStreamRenderTime = DateTime.UtcNow;
             }
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -105,6 +113,8 @@ namespace AI_Studio
             _conversation.Clear();
             _conversation.Add(new ChatMessage(ChatRole.Assistant, safeContent));
             _streamingBubble = null;
+            if (!isStreaming)
+                SetSendButtonMode();
             RebuildPanel();
         }
 
@@ -112,6 +122,11 @@ namespace AI_Studio
 
         private void OnSendButtonClick(object sender, RoutedEventArgs e)
         {
+            if (_isSending || RequestCancellationManager.IsActive)
+            {
+                CancelActiveRequest();
+                return;
+            }
             _ = ThreadHelper.JoinableTaskFactory.RunAsync(HandleSendAsync);
         }
 
@@ -120,8 +135,28 @@ namespace AI_Studio
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
                 e.Handled = true;
-                _ = ThreadHelper.JoinableTaskFactory.RunAsync(HandleSendAsync);
+                if (!_isSending && !RequestCancellationManager.IsActive)
+                    _ = ThreadHelper.JoinableTaskFactory.RunAsync(HandleSendAsync);
             }
+        }
+
+        private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape && (_isSending || RequestCancellationManager.IsActive))
+            {
+                CancelActiveRequest();
+                e.Handled = true;
+            }
+        }
+
+        private void CancelActiveRequest()
+        {
+            // Cancel follow-up chat if this control owns the stream,
+            // otherwise cancel a command-initiated stream.
+            if (_streamingCts != null)
+                _streamingCts.Cancel();
+            else
+                RequestCancellationManager.Cancel();
         }
 
         private async Task HandleSendAsync()
@@ -136,15 +171,18 @@ namespace AI_Studio
                 return;
 
             _isSending = true;
+            _streamingCts = new CancellationTokenSource();
             PromptInput.Text = string.Empty;
             PromptInput.IsEnabled = false;
-            SendButton.Content = "•••";
-            SendButton.IsEnabled = false;
+            SetStopButtonMode();
 
             _conversation.Add(new ChatMessage(ChatRole.User, userMessage));
             _showLoadingBubble = true;
             _streamingBubble = null;
             RebuildPanel();
+
+            var responseBuilder = new StringBuilder();
+            var wasCancelled = false;
 
             try
             {
@@ -158,7 +196,7 @@ namespace AI_Studio
                     return;
                 }
 
-                IChatClient client = ChatClientFactory.Create(generalOptions);
+                using IChatClient client = ChatClientFactory.Create(generalOptions);
 
                 var requestMessages = new List<ChatMessage>
                 {
@@ -167,20 +205,25 @@ namespace AI_Studio
                 };
                 requestMessages.AddRange(_conversation);
 
-                var responseBuilder = new StringBuilder();
-
-                await foreach (var update in client.GetStreamingResponseAsync(requestMessages))
+                try
                 {
-                    if (string.IsNullOrEmpty(update?.Text))
-                        continue;
+                    await foreach (var update in client.GetStreamingResponseAsync(requestMessages, cancellationToken: _streamingCts.Token))
+                    {
+                        if (string.IsNullOrEmpty(update?.Text))
+                            continue;
 
-                    responseBuilder.Append(update.Text);
-                    await UpdateStreamingBubbleAsync(responseBuilder.ToString());
+                        responseBuilder.Append(update.Text);
+                        await UpdateStreamingBubbleAsync(responseBuilder.ToString());
+                    }
+                }
+                catch (OperationCanceledException) when (_streamingCts.IsCancellationRequested)
+                {
+                    wasCancelled = true;
                 }
 
                 var assistantMessage = responseBuilder.Length == 0
-                    ? "(No response returned.)"
-                    : responseBuilder.ToString();
+                    ? (wasCancelled ? "_(stopped)_" : "(No response returned.)")
+                    : (wasCancelled ? responseBuilder.ToString() + "\n\n_(stopped)_" : responseBuilder.ToString());
 
                 _conversation.Add(new ChatMessage(ChatRole.Assistant, assistantMessage));
                 _streamingBubble = null;
@@ -194,15 +237,30 @@ namespace AI_Studio
             }
             finally
             {
+                _streamingCts?.Dispose();
+                _streamingCts = null;
                 _isSending = false;
                 _showLoadingBubble = false;
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 SetViewState(_conversation.Count > 0 ? ViewState.Content : ViewState.Empty);
                 PromptInput.IsEnabled = true;
-                SendButton.Content = "Send";
-                SendButton.IsEnabled = true;
+                SetSendButtonMode();
                 PromptInput.Focus();
             }
+        }
+
+        private void SetStopButtonMode()
+        {
+            SendButton.Content = "Stop";
+            SendButton.IsEnabled = true;
+            SendButton.ToolTip = "Stop the current request (Esc)";
+        }
+
+        private void SetSendButtonMode()
+        {
+            SendButton.Content = "Send";
+            SendButton.IsEnabled = true;
+            SendButton.ToolTip = null;
         }
 
         // ── Streaming bubble ──────────────────────────────────────────────────

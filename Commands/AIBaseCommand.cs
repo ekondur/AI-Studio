@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AI_Studio
@@ -135,49 +136,58 @@ namespace AI_Studio
             // We only jump back to the main thread when editing the text buffer.
             await TaskScheduler.Default;
 
+            var cts = RequestCancellationManager.Begin();
             try
             {
                 var responseBuilder = new StringBuilder();
                 var currentLength = 0;
                 var hasReplacedInitial = false;
+                var wasCancelled = false;
 
-                await foreach (var update in client.GetStreamingResponseAsync(messages))
+                try
                 {
-                    var chunk = update?.Text;
-                    if (string.IsNullOrEmpty(chunk))
-                        continue;
-
-                    var chunkOffset = currentLength;
-                    var chunkToApply = ResponseBehavior == ResponseBehavior.Insert && currentLength == 0
-                        ? Environment.NewLine + chunk
-                        : chunk;
-
-                    await EndStatusOnceAsync();
-                    responseBuilder.Append(chunkToApply);
-
-                    if (ResponseBehavior == ResponseBehavior.Message)
+                    await foreach (var update in client.GetStreamingResponseAsync(messages, cancellationToken: cts.Token))
                     {
-                        await ShowResponseInToolWindowAsync(responseBuilder.ToString(), isStreaming: true);
+                        var chunk = update?.Text;
+                        if (string.IsNullOrEmpty(chunk))
+                            continue;
+
+                        var chunkOffset = currentLength;
+                        var chunkToApply = ResponseBehavior == ResponseBehavior.Insert && currentLength == 0
+                            ? Environment.NewLine + chunk
+                            : chunk;
+
+                        await EndStatusOnceAsync();
+                        responseBuilder.Append(chunkToApply);
+
+                        if (ResponseBehavior == ResponseBehavior.Message)
+                        {
+                            await ShowResponseInToolWindowAsync(responseBuilder.ToString(), isStreaming: true);
+                            await TaskScheduler.Default; // release main thread before next chunk
+                            continue;
+                        }
+
+                        // Grab main thread only for the buffer edit, then release it
+                        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                        if (ResponseBehavior == ResponseBehavior.Replace && !hasReplacedInitial)
+                        {
+                            docView.TextBuffer.Replace(originalSelection, chunkToApply);
+                            hasReplacedInitial = true;
+                            currentLength = chunkToApply.Length;
+                        }
+                        else
+                        {
+                            docView.TextBuffer.Insert(insertionStart + chunkOffset, chunkToApply);
+                            currentLength += chunkToApply.Length;
+                        }
+
                         await TaskScheduler.Default; // release main thread before next chunk
-                        continue;
                     }
-
-                    // Grab main thread only for the buffer edit, then release it
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                    if (ResponseBehavior == ResponseBehavior.Replace && !hasReplacedInitial)
-                    {
-                        docView.TextBuffer.Replace(originalSelection, chunkToApply);
-                        hasReplacedInitial = true;
-                        currentLength = chunkToApply.Length;
-                    }
-                    else
-                    {
-                        docView.TextBuffer.Insert(insertionStart + chunkOffset, chunkToApply);
-                        currentLength += chunkToApply.Length;
-                    }
-
-                    await TaskScheduler.Default; // release main thread before next chunk
+                }
+                catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                {
+                    wasCancelled = true;
                 }
 
                 var response = responseBuilder.ToString();
@@ -186,6 +196,8 @@ namespace AI_Studio
 
                 if (ResponseBehavior == ResponseBehavior.Message)
                 {
+                    if (wasCancelled)
+                        response = response.Length > 0 ? response + "\n\n_(stopped)_" : "_(stopped)_";
                     await ShowResponseInToolWindowAsync(response);
                 }
                 else
@@ -196,6 +208,9 @@ namespace AI_Studio
                     var finalSelection = new SnapshotSpan(finalSnapshot, Span.FromBounds(insertionStart, insertionStart + response.Length));
                     docView.TextView.Selection.Select(finalSelection, false);
                 }
+
+                if (wasCancelled)
+                    await VS.StatusBar.ShowMessageAsync("AI Studio: Stopped");
             }
             catch (Exception ex)
             {
@@ -203,6 +218,7 @@ namespace AI_Studio
             }
             finally
             {
+                RequestCancellationManager.End(cts);
                 await EndStatusOnceAsync();
             }
 
