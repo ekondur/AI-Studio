@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/400ac43e51b04f3fb2f335c1688b8d4b)](https://app.codacy.com/gh/ekondur/AI-Studio/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generation, refactoring, documentation, testing, and security analysis to the IDE directly from the context menu.
+AI Studio is a Visual Studio 2022, 2026 extension that adds AI-assisted code generation, refactoring, documentation, testing, and security analysis to the IDE directly from the context menu.
 
 - [Download from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
 - [Report an issue or request a feature](https://github.com/ekondur/AI-Studio/issues)
