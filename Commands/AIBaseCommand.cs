@@ -129,8 +129,9 @@ namespace AI_Studio
 
             // For Message mode: open the tool window and show the thinking indicator
             // before starting the HTTP call, so the user has immediate feedback.
+            int? toolWindowGeneration = null;
             if (ResponseBehavior == ResponseBehavior.Message)
-                await PrepareToolWindowAsync();
+                toolWindowGeneration = await PrepareToolWindowAsync();
 
             // Switch to a background thread so HTTP and streaming do not block the UI.
             // We only jump back to the main thread when editing the text buffer.
@@ -162,7 +163,7 @@ namespace AI_Studio
 
                         if (ResponseBehavior == ResponseBehavior.Message)
                         {
-                            await ShowResponseInToolWindowAsync(responseBuilder.ToString(), isStreaming: true);
+                            await ShowResponseInToolWindowAsync(responseBuilder.ToString(), isStreaming: true, conversationGeneration: toolWindowGeneration);
                             await TaskScheduler.Default; // release main thread before next chunk
                             continue;
                         }
@@ -198,7 +199,7 @@ namespace AI_Studio
                 {
                     if (wasCancelled)
                         response = response.Length > 0 ? response + "\n\n_(stopped)_" : "_(stopped)_";
-                    await ShowResponseInToolWindowAsync(response);
+                    await ShowResponseInToolWindowAsync(response, conversationGeneration: toolWindowGeneration);
                 }
                 else
                 {
@@ -286,7 +287,7 @@ namespace AI_Studio
             return true;
         }
 
-        private async Task PrepareToolWindowAsync()
+        private async System.Threading.Tasks.Task<int> PrepareToolWindowAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var toolWindow = await Package.FindToolWindowAsync(
@@ -294,10 +295,12 @@ namespace AI_Studio
             var windowFrame = (IVsWindowFrame)toolWindow.Frame;
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
             if (toolWindow is OutputToolWindow outputWindow)
-                await outputWindow.BeginStreamingAsync();
+                return await outputWindow.BeginStreamingAsync();
+
+            return 0;
         }
 
-        private async Task ShowResponseInToolWindowAsync(string response, bool isStreaming = false)
+        private async Task ShowResponseInToolWindowAsync(string response, bool isStreaming = false, int? conversationGeneration = null)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var toolWindow = await Package.FindToolWindowAsync(
@@ -305,7 +308,7 @@ namespace AI_Studio
             var windowFrame = (IVsWindowFrame)toolWindow.Frame;
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
             if (toolWindow is OutputToolWindow outputWindow)
-                await outputWindow.UpdateContentAsync(response, isStreaming);
+                await outputWindow.UpdateContentAsync(response, isStreaming, conversationGeneration);
         }
     }
 }

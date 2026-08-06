@@ -27,14 +27,19 @@ namespace AI_Studio
             this.Content = _control;
         }
 
-        public async Task BeginStreamingAsync()
+        public async System.Threading.Tasks.Task<int> BeginStreamingAsync()
         {
-            await _control.BeginStreamingAsync();
+            return await _control.BeginStreamingAsync();
         }
 
-        public async Task UpdateContentAsync(string content, bool isStreaming = false)
+        public async Task ResetChatAsync()
         {
-            await _control.UpdateContentAsync(content, isStreaming);
+            await _control.ResetChatAsync();
+        }
+
+        public async Task UpdateContentAsync(string content, bool isStreaming = false, int? conversationGeneration = null)
+        {
+            await _control.UpdateContentAsync(content, isStreaming, conversationGeneration);
         }
     }
 }

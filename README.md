@@ -28,7 +28,7 @@ AI Studio is a Visual Studio 2022 extension that adds AI-assisted code generatio
 - Supports **OpenAI**, **Azure AI**, **Anthropic (Claude)**, and **Ollama** (local or cloud) — switch provider from the Options page.
 - Generates or updates code while preserving formatting, documentation, and project conventions.
 - Built-in commands for documentation, explanations, security review, and unit test creation keep teams in flow.
-- Integrated Output tool window now supports follow-up chat with a VS-themed input bar and smooth streaming updates without focus jumps.
+- Integrated Output tool window supports follow-up chat, a dedicated New Chat command, and smooth streaming updates without focus jumps.
 
 ## Requirements
 
@@ -135,6 +135,7 @@ Select `OpenAI` as the provider and change the **API Endpoint** to your private 
 | Explain | Understand unfamiliar code quickly. | Displays a plain-language explanation. |
 | Security Check | Inspect code for risky patterns and mitigations. | Lists potential vulnerabilities plus suggestions. |
 | Add Unit Tests | Generate unit tests tailored to the selected method. | Creates a new test class or method snippet. |
+| New Chat | Start a clean conversation without selecting code. | Opens the AI Studio response window with an empty chat. |
 
 ## Feature Walkthrough
 
@@ -167,6 +168,12 @@ Select `OpenAI` as the provider and change the **API Endpoint** to your private 
 1. Highlight unfamiliar code.
 2. Choose `AI Studio > Explain`.
 3. A popup summarizes what the code does and why.
+
+### New Chat
+
+1. Right-click in the editor and choose `AI Studio > New Chat`.
+2. AI Studio opens the response window with an empty conversation.
+3. Type a question in the input bar and press Enter to send.
 
 ### Security Check
 
