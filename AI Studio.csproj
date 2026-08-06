@@ -52,6 +52,7 @@
     <Compile Include="Commands\Refactor.cs" />
     <Compile Include="Commands\CodeIt.cs" />
     <Compile Include="Commands\SecurityCheck.cs" />
+    <Compile Include="Commands\NewChat.cs" />
     <Compile Include="Enums\AIProvider.cs" />
     <Compile Include="Enums\ResponseBehavior.cs" />
     <Compile Include="Helpers\AnthropicChatClient.cs" />
@@ -88,7 +89,7 @@
       <Generator>VsixManifestGenerator</Generator>
       <LastGenOutput>source.extension.cs</LastGenOutput>
     </None>
-    <Content Include="License.txt">
+    <Content Include="LICENSE">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

@@ -78,6 +78,14 @@
 					<LocCanonicalName>.AI_Studio.SecurityCheck</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="AI_Studio" id="NewChat" priority="0x0007" type="Button">
+				<Icon guid="ImageCatalogGuid" id="AddComment" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>New Chat</ButtonText>
+					<LocCanonicalName>.AI_Studio.NewChat</LocCanonicalName>
+				</Strings>
+			</Button>
 		  <Button guid="guidAIStudioPackageCmdSet" id="cmdidOutputToolWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages" id="bmpPic1" />
@@ -123,6 +131,9 @@
 		<CommandPlacement guid="AI_Studio" id="SecurityCheck" priority="0x0006">
 			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="NewChat" priority="0x0007">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
+		</CommandPlacement>
 	</CommandPlacements>
 
 	<Symbols>
@@ -137,6 +148,7 @@
 			<IDSymbol name="Explain" value="0x0004" />
 			<IDSymbol name="CodeIt" value="0x0005" />
 			<IDSymbol name="SecurityCheck" value="0x0006" />
+			<IDSymbol name="NewChat" value="0x0007" />
 		</GuidSymbol>
 	
     <GuidSymbol value="{e9270b1a-7438-468b-a633-2d10046015b2}" name="guidAIStudioPackageCmdSet">

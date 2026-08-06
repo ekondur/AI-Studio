@@ -30,5 +30,6 @@ namespace AI_Studio
         public const int Explain = 0x0004;
         public const int CodeIt = 0x0005;
         public const int SecurityCheck = 0x0006;
+        public const int NewChat = 0x0007;
     }
 }

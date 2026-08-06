@@ -23,6 +23,7 @@ namespace AI_Studio
         private enum ViewState { Empty, Content }
 
         private readonly List<ChatMessage> _conversation = new List<ChatMessage>();
+        private int _conversationGeneration;
         private bool _isSending;
         private bool _showLoadingBubble;
         private Border _streamingBubble;
@@ -87,17 +88,41 @@ namespace AI_Studio
 
         // ── Public API (called from AIBaseCommand) ────────────────────────────
 
-        public async Task BeginStreamingAsync()
+        public async System.Threading.Tasks.Task<int> BeginStreamingAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            CancelFollowUpRequest();
+            var conversationGeneration = ++_conversationGeneration;
+            _streamingCts = null;
+            _isSending = false;
             _conversation.Clear();
             _showLoadingBubble = true;
             _streamingBubble = null;
             SetStopButtonMode();
             RebuildPanel();
+
+            return conversationGeneration;
         }
 
-        public async Task UpdateContentAsync(string content, bool isStreaming = false)
+        public async Task ResetChatAsync()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            CancelActiveRequest();
+            _conversationGeneration++;
+            _streamingCts = null;
+            _isSending = false;
+            _conversation.Clear();
+            _showLoadingBubble = false;
+            _streamingBubble = null;
+            PromptInput.Text = string.Empty;
+            PromptInput.IsEnabled = true;
+            SetSendButtonMode();
+            RebuildPanel();
+            PromptInput.Focus();
+        }
+
+        public async Task UpdateContentAsync(string content, bool isStreaming = false, int? conversationGeneration = null)
         {
             if (isStreaming)
             {
@@ -108,6 +133,9 @@ namespace AI_Studio
             }
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            if (conversationGeneration.HasValue && conversationGeneration.Value != _conversationGeneration)
+                return;
+
             _showLoadingBubble = false;
             var safeContent = string.IsNullOrWhiteSpace(content) ? "(No response returned.)" : content;
             _conversation.Clear();
@@ -154,9 +182,14 @@ namespace AI_Studio
             // Cancel follow-up chat if this control owns the stream,
             // otherwise cancel a command-initiated stream.
             if (_streamingCts != null)
-                _streamingCts.Cancel();
+                CancelFollowUpRequest();
             else
                 RequestCancellationManager.Cancel();
+        }
+
+        private void CancelFollowUpRequest()
+        {
+            _streamingCts?.Cancel();
         }
 
         private async Task HandleSendAsync()
@@ -170,8 +203,10 @@ namespace AI_Studio
             if (string.IsNullOrWhiteSpace(userMessage))
                 return;
 
+            var requestGeneration = _conversationGeneration;
+            var requestCts = new CancellationTokenSource();
             _isSending = true;
-            _streamingCts = new CancellationTokenSource();
+            _streamingCts = requestCts;
             PromptInput.Text = string.Empty;
             PromptInput.IsEnabled = false;
             SetStopButtonMode();
@@ -207,19 +242,22 @@ namespace AI_Studio
 
                 try
                 {
-                    await foreach (var update in client.GetStreamingResponseAsync(requestMessages, cancellationToken: _streamingCts.Token))
+                    await foreach (var update in client.GetStreamingResponseAsync(requestMessages, cancellationToken: requestCts.Token))
                     {
                         if (string.IsNullOrEmpty(update?.Text))
                             continue;
 
                         responseBuilder.Append(update.Text);
-                        await UpdateStreamingBubbleAsync(responseBuilder.ToString());
+                        await UpdateStreamingBubbleAsync(responseBuilder.ToString(), requestGeneration);
                     }
                 }
-                catch (OperationCanceledException) when (_streamingCts.IsCancellationRequested)
+                catch (OperationCanceledException) when (requestCts.IsCancellationRequested)
                 {
                     wasCancelled = true;
                 }
+
+                if (requestGeneration != _conversationGeneration)
+                    return;
 
                 var assistantMessage = responseBuilder.Length == 0
                     ? (wasCancelled ? "_(stopped)_" : "(No response returned.)")
@@ -233,19 +271,28 @@ namespace AI_Studio
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                if (requestGeneration == _conversationGeneration)
+                    await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
             }
             finally
             {
-                _streamingCts?.Dispose();
-                _streamingCts = null;
-                _isSending = false;
-                _showLoadingBubble = false;
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                SetViewState(_conversation.Count > 0 ? ViewState.Content : ViewState.Empty);
-                PromptInput.IsEnabled = true;
-                SetSendButtonMode();
-                PromptInput.Focus();
+                if (ReferenceEquals(_streamingCts, requestCts))
+                {
+                    _streamingCts = null;
+                    _isSending = false;
+                    _showLoadingBubble = false;
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                    if (requestGeneration == _conversationGeneration)
+                    {
+                        SetViewState(_conversation.Count > 0 ? ViewState.Content : ViewState.Empty);
+                        PromptInput.IsEnabled = true;
+                        SetSendButtonMode();
+                        PromptInput.Focus();
+                    }
+                }
+
+                requestCts.Dispose();
             }
         }
 
@@ -265,13 +312,16 @@ namespace AI_Studio
 
         // ── Streaming bubble ──────────────────────────────────────────────────
 
-        private async Task UpdateStreamingBubbleAsync(string markdown)
+        private async Task UpdateStreamingBubbleAsync(string markdown, int conversationGeneration)
         {
             var elapsed = (DateTime.UtcNow - _lastStreamRenderTime).TotalMilliseconds;
             if (elapsed < StreamRenderThrottleMs)
                 return;
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            if (conversationGeneration != _conversationGeneration)
+                return;
+
             _lastStreamRenderTime = DateTime.UtcNow;
             _showLoadingBubble = false;
 
