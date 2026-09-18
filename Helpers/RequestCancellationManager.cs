@@ -16,7 +16,7 @@ namespace AI_Studio.Helpers
         public static CancellationTokenSource Begin()
         {
             _current?.Cancel();
-            _current?.Dispose();
+            // The request that owns this source disposes it in End, after its stream exits.
 
             var cts = new CancellationTokenSource();
             _current = cts;

@@ -27,9 +27,9 @@ namespace AI_Studio
             this.Content = _control;
         }
 
-        public async System.Threading.Tasks.Task<int> BeginStreamingAsync()
+        internal async System.Threading.Tasks.Task<int> BeginStreamingAsync(System.Collections.Generic.List<Microsoft.Extensions.AI.ChatMessage> messages, Helpers.PendingEditorChange pendingChange)
         {
-            return await _control.BeginStreamingAsync();
+            return await _control.BeginStreamingAsync(messages, pendingChange);
         }
 
         public async Task ResetChatAsync()

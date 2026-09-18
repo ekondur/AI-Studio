@@ -62,6 +62,7 @@
     <Compile Include="Helpers\OpenAIChatClient.cs" />
     <Compile Include="Helpers\EnumHelpers.cs" />
     <Compile Include="Helpers\RequestCancellationManager.cs" />
+    <Compile Include="Helpers\PendingEditorChange.cs" />
     <Compile Include="Options\Commands.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\UnitTests.cs" />
