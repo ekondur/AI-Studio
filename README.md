@@ -124,14 +124,24 @@ Pull a model first with `ollama pull llama3.2`, then start Ollama before using A
 
 Select `OpenAI` as the provider and change the **API Endpoint** to your private or self-hosted URL (e.g. `https://llm.internal/api/v1`). Enter the API key issued by that gateway and set the appropriate model name.
 
+## Review context menu responses in Chat
+
+All context menu commands show their responses in the Chat window first. No setting is required, and files stay unchanged until you choose to apply a result. This works with every provider, including local Ollama.
+
+- **Replace Selection** is available for Add Summary, Add Comments, and Refactor.
+- **Insert into Editor** is available for Code It and inserts after the original selection.
+- **Copy** is available for all responses, including explanations, security reviews, and unit tests.
+
+Editor actions open a diff preview with **Apply** and **Cancel**. They target the original file and selection even after you switch editors. If that selection has changed or its editor has closed, run the command again. Cancelled, failed, or empty responses cannot be applied. Follow-up questions retain the original code and command context.
+
 ## Command Cheat Sheet
 
 | Command | When to use | Output |
 | --- | --- | --- |
-| Code It | Turn TODOs or signatures into working code. | Inserts generated implementation inline. |
+| Code It | Turn TODOs or signatures into working code. | Shows an implementation in Chat with an insert action. |
 | Add Comments | Document existing logic without manual XML comments. | Adds inline comments or summaries. |
 | Add Summary | Produce XML doc comments for public APIs. | Generates `<summary>` and related tags. |
-| Refactor | Improve readability or performance of selected code. | Replaces the selection with an optimized version. |
+| Refactor | Improve readability or performance of selected code. | Shows an optimized version in Chat with a replace action. |
 | Explain | Understand unfamiliar code quickly. | Displays a plain-language explanation. |
 | Security Check | Inspect code for risky patterns and mitigations. | Lists potential vulnerabilities plus suggestions. |
 | Add Unit Tests | Generate unit tests tailored to the selected method. | Creates a new test class or method snippet. |
@@ -149,7 +159,7 @@ Select `OpenAI` as the provider and change the **API Endpoint** to your private 
 
 1. Highlight the code you want documented.
 2. Run `AI Studio > Add Comments`.
-3. AI Studio adds concise inline comments without disturbing formatting.
+3. Review the commented code in Chat, then choose **Replace Selection** to preview and apply it.
 
 ### Refactor
 
@@ -161,13 +171,13 @@ Select `OpenAI` as the provider and change the **API Endpoint** to your private 
 
 1. Select a method header or type declaration.
 2. Run `AI Studio > Add Summary`.
-3. Automatically generates XML documentation that matches the signature.
+3. Review the documented code in Chat, then choose **Replace Selection** to preview and apply it.
 
 ### Explain
 
 1. Highlight unfamiliar code.
 2. Choose `AI Studio > Explain`.
-3. A popup summarizes what the code does and why.
+3. Read the explanation in Chat and ask follow-up questions.
 
 ### New Chat
 

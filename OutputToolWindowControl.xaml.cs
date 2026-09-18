@@ -23,6 +23,10 @@ namespace AI_Studio
         private enum ViewState { Empty, Content }
 
         private readonly List<ChatMessage> _conversation = new List<ChatMessage>();
+        private readonly List<ChatMessage> _commandContext = new List<ChatMessage>();
+        private PendingEditorChange _pendingChange;
+        private ChatMessage _commandResponse;
+        private bool _commandStreaming;
         private int _conversationGeneration;
         private bool _isSending;
         private bool _showLoadingBubble;
@@ -88,14 +92,20 @@ namespace AI_Studio
 
         // ── Public API (called from AIBaseCommand) ────────────────────────────
 
-        public async System.Threading.Tasks.Task<int> BeginStreamingAsync()
+        internal async System.Threading.Tasks.Task<int> BeginStreamingAsync(List<ChatMessage> messages, PendingEditorChange pendingChange)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            CancelFollowUpRequest();
+            CancelActiveRequest();
             var conversationGeneration = ++_conversationGeneration;
             _streamingCts = null;
             _isSending = false;
             _conversation.Clear();
+            _commandContext.Clear();
+            _commandContext.AddRange(messages);
+            _pendingChange = pendingChange;
+            _commandResponse = null;
+            _commandStreaming = true;
+            PromptInput.IsEnabled = false;
             _showLoadingBubble = true;
             _streamingBubble = null;
             SetStopButtonMode();
@@ -113,6 +123,10 @@ namespace AI_Studio
             _streamingCts = null;
             _isSending = false;
             _conversation.Clear();
+            _commandContext.Clear();
+            _pendingChange = null;
+            _commandResponse = null;
+            _commandStreaming = false;
             _showLoadingBubble = false;
             _streamingBubble = null;
             PromptInput.Text = string.Empty;
@@ -139,7 +153,10 @@ namespace AI_Studio
             _showLoadingBubble = false;
             var safeContent = string.IsNullOrWhiteSpace(content) ? "(No response returned.)" : content;
             _conversation.Clear();
-            _conversation.Add(new ChatMessage(ChatRole.Assistant, safeContent));
+            _commandResponse = new ChatMessage(ChatRole.Assistant, safeContent);
+            _conversation.Add(_commandResponse);
+            _commandStreaming = isStreaming;
+            PromptInput.IsEnabled = !isStreaming;
             _streamingBubble = null;
             if (!isStreaming)
                 SetSendButtonMode();
@@ -238,6 +255,7 @@ namespace AI_Studio
                     new ChatMessage(ChatRole.System,
                         "You are AI Studio inside Visual Studio. Respond with concise, markdown-formatted answers suited for developers.")
                 };
+                requestMessages.AddRange(_commandContext);
                 requestMessages.AddRange(_conversation);
 
                 try
@@ -358,7 +376,35 @@ namespace AI_Studio
 
             foreach (var msg in _conversation)
             {
-                var bubble = CreateMessageBubble(msg.Role == ChatRole.User, msg.Text ?? string.Empty);
+                var bubble = CreateMessageBubble(msg.Role == ChatRole.User, msg.Text ?? string.Empty,
+                    isStreaming: ReferenceEquals(msg, _commandResponse) && _commandStreaming);
+                if (ReferenceEquals(msg, _commandResponse) && !_commandStreaming && _pendingChange?.Response != null)
+                {
+                    var change = _pendingChange;
+                    var applyButton = new Button
+                    {
+                        Content = change.IsApplied ? "Applied" : change.ActionLabel,
+                        IsEnabled = !change.IsApplied,
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        Margin = new Thickness(0, 8, 0, 0),
+                        Padding = new Thickness(10, 4, 10, 4),
+                        ToolTip = "Preview changes to the original file before applying."
+                    };
+                    applyButton.Click += (sender, args) =>
+                    {
+                        _ = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+                        {
+                            applyButton.IsEnabled = false;
+                            try { await change.PreviewAndApplyAsync(); }
+                            catch (Exception ex)
+                            {
+                                await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                            }
+                            finally { RebuildPanel(); }
+                        });
+                    };
+                    ((StackPanel)bubble.Child).Children.Add(applyButton);
+                }
                 ConversationPanel.Children.Add(bubble);
             }
 

@@ -1,5 +1,4 @@
 ﻿using AI_Studio.Helpers;
-using EnvDTE;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -61,6 +60,11 @@ namespace AI_Studio
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             var docView = await VS.Documents.GetActiveDocumentViewAsync();
+            if (docView?.TextView == null)
+            {
+                await EndStatusOnceAsync();
+                return;
+            }
             var snapshot = docView.TextView.TextBuffer.CurrentSnapshot;
             var selection = docView.TextView.Selection.SelectedSpans.FirstOrDefault();
             if (selection.Snapshot == null)
@@ -101,12 +105,9 @@ namespace AI_Studio
             }
 
             var text = docView.TextView.Selection.StreamSelectionSpan.GetText();
-            var selectionStartLineNumber = docView.TextView.TextBuffer.CurrentSnapshot.GetLineNumberFromPosition(selection.Start.Position);
             var contentTypeName = docView.TextView.TextDataModel.ContentType.DisplayName;
-            var insertionStart = ResponseBehavior == ResponseBehavior.Insert
-                ? selection.End.Position
-                : selection.Start.Position;
-            var originalSelection = selection;
+            var pendingChange = ResponseBehavior == ResponseBehavior.Message ? null
+                : new PendingEditorChange(docView, selection, ResponseBehavior, generalOptions.FormatChangedText);
 
             if (string.IsNullOrEmpty(text))
             {
@@ -127,22 +128,13 @@ namespace AI_Studio
 
             using IChatClient client = ChatClientFactory.Create(generalOptions);
 
-            // For Message mode: open the tool window and show the thinking indicator
-            // before starting the HTTP call, so the user has immediate feedback.
-            int? toolWindowGeneration = null;
-            if (ResponseBehavior == ResponseBehavior.Message)
-                toolWindowGeneration = await PrepareToolWindowAsync();
-
-            // Switch to a background thread so HTTP and streaming do not block the UI.
-            // We only jump back to the main thread when editing the text buffer.
-            await TaskScheduler.Default;
+            var toolWindowGeneration = await PrepareToolWindowAsync(messages, pendingChange);
 
             var cts = RequestCancellationManager.Begin();
             try
             {
+                await TaskScheduler.Default;
                 var responseBuilder = new StringBuilder();
-                var currentLength = 0;
-                var hasReplacedInitial = false;
                 var wasCancelled = false;
 
                 try
@@ -153,37 +145,10 @@ namespace AI_Studio
                         if (string.IsNullOrEmpty(chunk))
                             continue;
 
-                        var chunkOffset = currentLength;
-                        var chunkToApply = ResponseBehavior == ResponseBehavior.Insert && currentLength == 0
-                            ? Environment.NewLine + chunk
-                            : chunk;
-
-                        await EndStatusOnceAsync();
-                        responseBuilder.Append(chunkToApply);
-
-                        if (ResponseBehavior == ResponseBehavior.Message)
-                        {
-                            await ShowResponseInToolWindowAsync(responseBuilder.ToString(), isStreaming: true, conversationGeneration: toolWindowGeneration);
-                            await TaskScheduler.Default; // release main thread before next chunk
-                            continue;
-                        }
-
-                        // Grab main thread only for the buffer edit, then release it
-                        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                        if (ResponseBehavior == ResponseBehavior.Replace && !hasReplacedInitial)
-                        {
-                            docView.TextBuffer.Replace(originalSelection, chunkToApply);
-                            hasReplacedInitial = true;
-                            currentLength = chunkToApply.Length;
-                        }
-                        else
-                        {
-                            docView.TextBuffer.Insert(insertionStart + chunkOffset, chunkToApply);
-                            currentLength += chunkToApply.Length;
-                        }
-
-                        await TaskScheduler.Default; // release main thread before next chunk
+                        responseBuilder.Append(chunk);
+                        await ShowResponseInToolWindowAsync(responseBuilder.ToString(), isStreaming: true,
+                            conversationGeneration: toolWindowGeneration);
+                        await TaskScheduler.Default;
                     }
                 }
                 catch (OperationCanceledException) when (cts.IsCancellationRequested)
@@ -191,31 +156,25 @@ namespace AI_Studio
                     wasCancelled = true;
                 }
 
+                wasCancelled |= cts.IsCancellationRequested;
                 var response = responseBuilder.ToString();
-                if (_stripResponseMarkdownCode)
-                    response = StripResponseMarkdownCode(response);
-
-                if (ResponseBehavior == ResponseBehavior.Message)
-                {
-                    if (wasCancelled)
-                        response = response.Length > 0 ? response + "\n\n_(stopped)_" : "_(stopped)_";
-                    await ShowResponseInToolWindowAsync(response, conversationGeneration: toolWindowGeneration);
-                }
-                else
-                {
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    docView.TextBuffer.Replace(new Span(insertionStart, currentLength), response);
-                    var finalSnapshot = docView.TextBuffer.CurrentSnapshot;
-                    var finalSelection = new SnapshotSpan(finalSnapshot, Span.FromBounds(insertionStart, insertionStart + response.Length));
-                    docView.TextView.Selection.Select(finalSelection, false);
-                }
+                if (!wasCancelled && pendingChange != null && !string.IsNullOrWhiteSpace(response))
+                    pendingChange.Response = _stripResponseMarkdownCode ? StripResponseMarkdownCode(response) : response;
+                if (wasCancelled)
+                    response = response.Length > 0 ? response + "\n\n_(stopped)_" : "_(stopped)_";
+                await ShowResponseInToolWindowAsync(response, conversationGeneration: toolWindowGeneration);
 
                 if (wasCancelled)
+                {
+                    await EndStatusOnceAsync();
                     await VS.StatusBar.ShowMessageAsync("AI Studio: Stopped");
+                }
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowAsync(ex.Message, buttons: OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                if (pendingChange != null)
+                    pendingChange.Response = null;
+                await ShowResponseInToolWindowAsync("Request failed: " + ex.Message, conversationGeneration: toolWindowGeneration);
             }
             finally
             {
@@ -223,19 +182,6 @@ namespace AI_Studio
                 await EndStatusOnceAsync();
             }
 
-            if (generalOptions.FormatChangedText && ResponseBehavior != ResponseBehavior.Message)
-            {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                selection = docView.TextView.Selection.SelectedSpans.FirstOrDefault();
-                if (selection.Length == 0)
-                {
-                    var startLine = docView.TextView.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(selectionStartLineNumber);
-                    var endLine = docView.TextView.TextBuffer.CurrentSnapshot.GetLineFromPosition(selection.End);
-                    docView.TextView.Selection.Select(new SnapshotSpan(startLine.Start, endLine.End), false);
-                }
-
-                (await VS.GetServiceAsync<DTE, DTE>()).ExecuteCommand("Edit.FormatSelection");
-            }
         }
 
         private static readonly Regex _markdownCodeRegex = new Regex(@"```.*\r?\n?", RegexOptions.Compiled);
@@ -287,7 +233,7 @@ namespace AI_Studio
             return true;
         }
 
-        private async System.Threading.Tasks.Task<int> PrepareToolWindowAsync()
+        private async System.Threading.Tasks.Task<int> PrepareToolWindowAsync(List<ChatMessage> messages, PendingEditorChange pendingChange)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var toolWindow = await Package.FindToolWindowAsync(
@@ -295,7 +241,7 @@ namespace AI_Studio
             var windowFrame = (IVsWindowFrame)toolWindow.Frame;
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
             if (toolWindow is OutputToolWindow outputWindow)
-                return await outputWindow.BeginStreamingAsync();
+                return await outputWindow.BeginStreamingAsync(messages, pendingChange);
 
             return 0;
         }
@@ -305,8 +251,6 @@ namespace AI_Studio
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var toolWindow = await Package.FindToolWindowAsync(
                 typeof(OutputToolWindow), 0, true, VsShellUtilities.ShutdownToken);
-            var windowFrame = (IVsWindowFrame)toolWindow.Frame;
-            ErrorHandler.ThrowOnFailure(windowFrame.Show());
             if (toolWindow is OutputToolWindow outputWindow)
                 await outputWindow.UpdateContentAsync(response, isStreaming, conversationGeneration);
         }
