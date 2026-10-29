@@ -7,7 +7,7 @@ AI Studio is a Visual Studio 2022, 2026 extension that adds AI-assisted code gen
 - [Download from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ekondur.AI-Studio)
 - [Report an issue or request a feature](https://github.com/ekondur/AI-Studio/issues)
 
-![AI Studio Preview](https://user-images.githubusercontent.com/4971326/234110009-382af5bf-9bc8-4bec-892b-90bf66b03fa3.png)
+<img width="517" height="230" alt="image" src="https://github.com/user-attachments/assets/78184c76-6fc8-42cb-a376-c6ce7eae61cd" />
 
 ## Table of Contents
 
