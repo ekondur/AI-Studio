@@ -32,7 +32,7 @@ AI Studio is a Visual Studio 2022, 2026 extension that adds AI-assisted code gen
 
 ## Requirements
 
-- Visual Studio 2022 17.6 or later with the VSIX extension workload installed.
+- Visual Studio 2022 17.10 or later with the VSIX extension workload installed. The extension uses the host's Roslyn 4.10+ workspace APIs for dependency analysis.
 - An API key for your chosen provider (not required for local Ollama) with network access from the IDE.
 - .NET Framework 4.8 SDK (installed with Visual Studio) for local builds.
 
@@ -143,7 +143,8 @@ Editor actions open a diff preview with **Apply** and **Cancel**. They target th
 | Add Summary | Produce XML doc comments for public APIs. | Generates `<summary>` and related tags. |
 | Refactor | Improve readability or performance of selected code. | Shows an optimized version in Chat with a replace action. |
 | Explain | Understand unfamiliar code quickly. | Displays a plain-language explanation. |
-| Security Check | Inspect code for risky patterns and mitigations. | Lists potential vulnerabilities plus suggestions. |
+| Security Check | Inspect code and, for loaded C# projects, dependencies and upstream callers. | Shows security findings with evidence, confidence, existing mitigations and suggested fixes. |
+| Analyze Performance | Review selected C# code and its solution dependencies for potential runtime bottlenecks. | Shows evidence, confidence, suggested fixes, and analysis coverage in Chat. |
 | Add Unit Tests | Generate unit tests tailored to the selected method. | Creates a new test class or method snippet. |
 | New Chat | Start a clean conversation without selecting code. | Opens the AI Studio response window with an empty chat. |
 
@@ -189,7 +190,27 @@ Editor actions open a diff preview with **Apply** and **Cancel**. They target th
 
 1. Select code that handles I/O, crypto, or user data.
 2. Run `AI Studio > Security Check`.
-3. Review the flagged issues and suggested mitigations.
+3. For C# code in a loaded solution, AI Studio collects referenced source dependencies and searches up to two caller levels above the selected declarations. Calls through interface/base contracts are labeled as possible dispatch paths. Related method, partial/containing-type and base-declaration attributes are included with source locations where available.
+4. Review scope, prioritized findings, file/line evidence, relevant call paths, existing mitigations, exploitation assumptions and suggested fixes in Chat. Follow-up questions retain the collected context. **Stop** or **Esc** cancels collection or the AI response.
+
+Security Check shares the bounded source collector used by Analyze Performance (five outgoing dependency levels, 80 declarations, 80,000 source-context characters, 6,000 examined references and 30 seconds overall). Caller discovery has a separate budget of 24 symbol queries, up to 24 caller declarations within the shared limit, and up to 10 seconds within the overall deadline. Attributes are bounded separately within the source-context budget. Any exhausted limits are reported in the context supplied to the AI.
+
+This is an AI-assisted static review, not complete taint analysis or a guarantee that the application is secure. Collected guards and attributes must be assessed in context; neither attribute presence nor missing local checks alone establish whether an operation is protected. Middleware, global filters, authorization policies, routing and deployment configuration are not exhaustively collected.
+
+Other languages and files outside a loaded C# project retain selection-only security review, explicitly identified as such. The selected code and any collected dependency/caller source are sent to the configured AI provider. Suggested changes are shown in Chat for review and copying; they are not applied automatically. Additional instructions remain configurable under `Tools > Options > AI Studio > Commands > Security Check`.
+
+### Analyze Performance
+
+1. Open a C# file in a loaded solution and select a method or code block (or place the caret inside a method).
+2. Choose `AI Studio > Analyze Performance`.
+3. AI Studio follows resolved method, constructor, property, field, and event references in the solution. It also collects possible interface implementations and virtual overrides, distinguishing them from known runtime targets.
+4. Review findings in Chat: severity, confidence, file/line evidence, conditions under which the issue matters, suggested code changes, and how to validate them. Follow-up questions retain the collected context. Use **Stop** or **Esc** to cancel collection or the AI response.
+
+This is **static analysis**, not a benchmark. It does not execute your code or produce measured speedups. Suggestions are shown for review and copying; this command does not apply edits automatically.
+
+The analysis uses the current editor snapshot, including unsaved changes, and sends the selected code plus collected dependency source to your configured AI provider. Collection runs in the background and is bounded to five dependency levels, 80 declarations, 80,000 source-context characters, 6,000 examined symbol references, and 30 seconds. Selections larger than 40,000 characters must be narrowed. When limits are reached, partial context and coverage limitations are supplied to the AI. It cannot inspect external service internals or unavailable package source, and reflection, delegates, dynamic dispatch, implicit compiler calls, and dependency-injection configuration may require manual investigation. It does not scan every member of every referenced type.
+
+Customize additional instructions under `Tools > Options > AI Studio > Commands > Analyze Performance`.
 
 ### Unit Test Generation
 

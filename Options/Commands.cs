@@ -40,7 +40,12 @@ namespace AI_Studio
 
         [Category("Commands")]
         [DisplayName("Security Check")]
-        [Description("Add some suggestions here for Chat GPT to customize 'Security Check' command.")]
+        [Description("Additional instructions for security review, including C# solution dependencies, upstream callers and relevant attributes when available.")]
         public string SecurityCheck { get; set; }
+
+        [Category("Commands")]
+        [DisplayName("Analyze Performance")]
+        [Description("Additional instructions for performance analysis of selected C# code and its solution dependencies.")]
+        public string AnalyzePerformance { get; set; }
     }
 }
