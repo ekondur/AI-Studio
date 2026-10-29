@@ -78,6 +78,14 @@
 					<LocCanonicalName>.AI_Studio.SecurityCheck</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="AI_Studio" id="AnalyzePerformance" priority="0x0006" type="Button">
+				<Icon guid="ImageCatalogGuid" id="DescriptionViewer" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Analyze Performance</ButtonText>
+					<LocCanonicalName>.AI_Studio.AnalyzePerformance</LocCanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="AI_Studio" id="NewChat" priority="0x0007" type="Button">
 				<Icon guid="ImageCatalogGuid" id="AddComment" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
@@ -134,6 +142,9 @@
 		<CommandPlacement guid="AI_Studio" id="NewChat" priority="0x0007">
 			<Parent guid="AI_Studio" id="AI_CommandGroup" />
 		</CommandPlacement>
+		<CommandPlacement guid="AI_Studio" id="AnalyzePerformance" priority="0x0008">
+			<Parent guid="AI_Studio" id="AI_CommandGroup" />
+		</CommandPlacement>
 	</CommandPlacements>
 
 	<Symbols>
@@ -149,6 +160,7 @@
 			<IDSymbol name="CodeIt" value="0x0005" />
 			<IDSymbol name="SecurityCheck" value="0x0006" />
 			<IDSymbol name="NewChat" value="0x0007" />
+			<IDSymbol name="AnalyzePerformance" value="0x0008" />
 		</GuidSymbol>
 	
     <GuidSymbol value="{e9270b1a-7438-468b-a633-2d10046015b2}" name="guidAIStudioPackageCmdSet">

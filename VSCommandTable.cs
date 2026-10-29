@@ -31,5 +31,6 @@ namespace AI_Studio
         public const int CodeIt = 0x0005;
         public const int SecurityCheck = 0x0006;
         public const int NewChat = 0x0007;
+        public const int AnalyzePerformance = 0x0008;
     }
 }

@@ -52,6 +52,7 @@
     <Compile Include="Commands\Refactor.cs" />
     <Compile Include="Commands\CodeIt.cs" />
     <Compile Include="Commands\SecurityCheck.cs" />
+    <Compile Include="Commands\AnalyzePerformance.cs" />
     <Compile Include="Commands\NewChat.cs" />
     <Compile Include="Enums\AIProvider.cs" />
     <Compile Include="Enums\ResponseBehavior.cs" />
@@ -63,6 +64,8 @@
     <Compile Include="Helpers\EnumHelpers.cs" />
     <Compile Include="Helpers\RequestCancellationManager.cs" />
     <Compile Include="Helpers\PendingEditorChange.cs" />
+    <Compile Include="Helpers\SourceContextCollector.cs" />
+    <Compile Include="Helpers\EditorAnalysisContext.cs" />
     <Compile Include="Options\Commands.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\UnitTests.cs" />
@@ -122,9 +125,13 @@
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-<PackageReference Include="Microsoft.CodeAnalysis.CSharp">
+    <!-- Use the host Roslyn assemblies to share the live Visual Studio workspace. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" ExcludeAssets="runtime" PrivateAssets="all">
       <Version>4.10.0</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.EditorFeatures.Text" Version="4.10.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.10.0" ExcludeAssets="runtime" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Extensions.AI">
       <Version>10.3.0</Version>
     </PackageReference>

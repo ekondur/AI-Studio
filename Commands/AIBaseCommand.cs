@@ -26,6 +26,9 @@ namespace AI_Studio
         protected bool _addContentTypePrefix = false;
         protected bool _stripResponseMarkdownCode = false;
 
+        protected virtual Task<string> BuildAdditionalContextAsync(ITextSnapshot snapshot, SnapshotSpan selection,
+            CancellationToken cancellationToken) => Task.FromResult<string>(null);
+
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             var generalOptions = await General.GetLiveInstanceAsync();
@@ -133,6 +136,13 @@ namespace AI_Studio
             var cts = RequestCancellationManager.Begin();
             try
             {
+                var context = await BuildAdditionalContextAsync(selection.Snapshot, selection, cts.Token);
+                cts.Token.ThrowIfCancellationRequested();
+                if (!string.IsNullOrEmpty(context))
+                {
+                    // BeginStreamingAsync retains these message instances for follow-up questions.
+                    messages[1].Contents.Add(new TextContent(context));
+                }
                 await TaskScheduler.Default;
                 var responseBuilder = new StringBuilder();
                 var wasCancelled = false;
@@ -169,6 +179,12 @@ namespace AI_Studio
                     await EndStatusOnceAsync();
                     await VS.StatusBar.ShowMessageAsync("AI Studio: Stopped");
                 }
+            }
+            catch (OperationCanceledException) when (cts.IsCancellationRequested)
+            {
+                await ShowResponseInToolWindowAsync("_(stopped)_", conversationGeneration: toolWindowGeneration);
+                await EndStatusOnceAsync();
+                await VS.StatusBar.ShowMessageAsync("AI Studio: Stopped");
             }
             catch (Exception ex)
             {
