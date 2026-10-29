@@ -9,10 +9,10 @@ namespace AI_Studio
     {
         public const string Id = "AI_Studio.74F4FED3-20F1-4F08-BEC5-1219C8EDC2AD";
         public const string Name = "AI Studio";
-        public const string Description = @"Supercharge your Visual Studio workflow with AI-powered tools like code generation, refactoring, commenting, unit test creation, and more, right from the right-click menu.";
+        public const string Description = @"Supercharge your Visual Studio workflow with AI-powered code generation, refactoring, documentation, and unit test creation. Analyze C# code and its solution dependencies for potential performance bottlenecks and security risks, with actionable recommendations, all from the right-click menu.";
         public const string Language = "en-US";
-        public const string Version = "2.9.0";
+        public const string Version = "3.0.0";
         public const string Author = "Emrah Kondur";
-        public const string Tags = "AI, UnitTest, Refactor, Summary, OpenAI, Azure AI, Ollama, Claude";
+        public const string Tags = "AI, UnitTest, Refactor, Summary, Security Check, Analyze Performance, OpenAI, Azure AI, Ollama, Claude";
     }
 }
