@@ -230,7 +230,7 @@ The selected code, collected production dependencies and test infrastructure sou
 
 Configure test generation under `Tools > Options > AI Studio > Unit Test`.
 
-![Unit Test Settings](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
+<img width="460" height="179" alt="unit-test-ss" src="https://github.com/user-attachments/assets/66e9b9c7-c012-4142-a311-06806f0820aa" />
 
 - **Use Existing Test Context** enables solution-aware reference collection (on by default).
 - **Preferred Test Project** optionally restricts discovery to an exact loaded project name, such as `MyApp.UnitTests`. This helps separate unit and integration test infrastructure. A missing or unrelated project is reported rather than silently replaced.
