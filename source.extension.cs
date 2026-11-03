@@ -11,7 +11,7 @@ namespace AI_Studio
         public const string Name = "AI Studio";
         public const string Description = @"Supercharge your Visual Studio workflow with AI-powered code generation, refactoring, documentation, and unit test creation. Analyze C# code and its solution dependencies for potential performance bottlenecks and security risks, with actionable recommendations, all from the right-click menu.";
         public const string Language = "en-US";
-        public const string Version = "3.0.0";
+        public const string Version = "3.1.0";
         public const string Author = "Emrah Kondur";
         public const string Tags = "AI, UnitTest, Refactor, Summary, Security Check, Analyze Performance, OpenAI, Azure AI, Ollama, Claude";
     }
