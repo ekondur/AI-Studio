@@ -23,6 +23,7 @@ namespace AI_Studio.Helpers
         private readonly int _maxCharacters;
         private readonly TimeSpan _timeout;
         private readonly bool _securityAnalysis;
+        private readonly bool _testGeneration;
         private readonly int _maxCallerDepth;
         private readonly Queue<WorkItem> _pending = new Queue<WorkItem>();
         private readonly HashSet<string> _visited = new HashSet<string>();
@@ -34,13 +35,15 @@ namespace AI_Studio.Helpers
         private int _examinedReferences;
 
         internal SourceContextCollector(int maxDepth = 5, int maxDeclarations = 80,
-            int maxCharacters = 80000, TimeSpan? timeout = null, bool securityAnalysis = false, int maxCallerDepth = 2)
+            int maxCharacters = 80000, TimeSpan? timeout = null, bool securityAnalysis = false, int maxCallerDepth = 2,
+            bool testGeneration = false)
         {
             _maxDepth = maxDepth;
             _maxDeclarations = maxDeclarations;
             _maxCharacters = maxCharacters;
             _timeout = timeout ?? TimeSpan.FromSeconds(30);
             _securityAnalysis = securityAnalysis;
+            _testGeneration = testGeneration;
             _maxCallerDepth = maxCallerDepth;
         }
 
@@ -158,7 +161,8 @@ namespace AI_Studio.Helpers
             cancellationToken.ThrowIfCancellationRequested();
 
             var result = new StringBuilder(_securityAnalysis
-                ? "\n\n## Static security analysis context\n" : "\n\n## Static performance analysis context\n");
+                ? "\n\n## Static security analysis context\n" : _testGeneration
+                ? "\n\n## Production source context for test generation\n" : "\n\n## Static performance analysis context\n");
             result.AppendLine("Selected location: " + document.Project.Name + "/" + document.Name
                 + " (character span " + selection.Start + ".." + selection.End + ")");
             result.AppendLine($"Collected {_declarations} source declarations. Limits: depth {_maxDepth}, {_maxDeclarations} declarations, {_maxCharacters} source-context characters, {_timeout.TotalSeconds:0} seconds.");

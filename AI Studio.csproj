@@ -65,6 +65,7 @@
     <Compile Include="Helpers\RequestCancellationManager.cs" />
     <Compile Include="Helpers\PendingEditorChange.cs" />
     <Compile Include="Helpers\SourceContextCollector.cs" />
+    <Compile Include="Helpers\TestGenerationContextCollector.cs" />
     <Compile Include="Helpers\EditorAnalysisContext.cs" />
     <Compile Include="Options\Commands.cs" />
     <Compile Include="Options\General.cs" />

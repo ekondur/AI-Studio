@@ -30,6 +30,7 @@ internal static class SourceContextCollectorTests
         await Check("Security: recursive callers and performance isolation", SecurityCycles);
         await Check("Security: cancellation and timeout", SecurityCancellation);
         Console.WriteLine("All 16 source context regression tests passed.");
+        await TestGenerationContextCollectorTests.RunAsync();
     }
 
     private static async Task Check(string name, Func<Task> test)

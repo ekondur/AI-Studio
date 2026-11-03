@@ -216,7 +216,15 @@ Customize additional instructions under `Tools > Options > AI Studio > Commands 
 
 1. Highlight a method to test.
 2. Run `AI Studio > Add Unit Tests`.
-3. AI Studio generates arrange/act/assert scaffolding tailored to the method.
+3. For a loaded C# project, AI Studio searches the current solution snapshot for existing xUnit, NUnit or MSTest tests in that project and projects referencing it. Resolved references to the selected method/type rank above class-name matches and general project examples.
+4. AI Studio collects up to three reference test classes, their base-class chains (including partial declarations), constructors, setup/teardown code, fixture contracts, and referenced source helpers/builders. xUnit class fixtures and string-linked collection definitions in the test project are followed. Production dependencies are supplied separately.
+5. Review the reference classes, suggested destination and proposed tests in Chat. The generation instructions favor the chosen project's conventions, reuse accessible base-class members and existing factories/mocks, and avoid duplicating setup. Conflicting unit/integration infrastructure is presented as alternatives instead of being combined. Follow-up questions retain the collected context.
+
+The output remains a reviewable code suggestion in Chat: this command does not insert tests, validate generated code or run tests. Framework/base-class choices made by the AI still require review. Test discovery requires resolved framework attributes; unloaded projects, missing references, custom frameworks, assembly-wide setup, global imports and external package implementations may limit the result. Other languages and files outside a loaded C# project keep selection-only generation.
+
+Collection is bounded to 300 searched documents, three reference test classes, 24 source types, four infrastructure dependency levels, 12,000 examined symbol references, 48,000 test-source characters and 15 seconds. Production context has a separate budget of 32 declarations, 32,000 source-context characters and 15 seconds. Partial results and exhausted limits are reported to the AI. **Stop** or **Esc** cancels collection or streaming. Source collection never executes test setup or fixture code.
+
+The selected code, collected production dependencies and test infrastructure source are sent to the configured AI provider. Disable **Use Existing Test Context** to send only the selection and configured instructions.
 
 #### Test Configuration
 
@@ -224,8 +232,10 @@ Configure test generation under `Tools > Options > AI Studio > Unit Test`.
 
 ![Unit Test Settings](https://user-images.githubusercontent.com/4971326/232892595-9e304843-8b0d-4420-b058-a0f44688f46e.png)
 
-- **Custom instructions** let you specify frameworks (xUnit, NUnit, MSTest), naming rules, or mocking preferences.
-- **Response behavior** controls how aggressively tests are regenerated versus appended.
+- **Use Existing Test Context** enables solution-aware reference collection (on by default).
+- **Preferred Test Project** optionally restricts discovery to an exact loaded project name, such as `MyApp.UnitTests`. This helps separate unit and integration test infrastructure. A missing or unrelated project is reported rather than silently replaced.
+- **Unit Testing Framework**, **Isolation Framework**, **Test/Dummy Data Framework** and **Assertion Framework** are fallback preferences when the selected project's examples do not establish a convention.
+- **Customize** supplies explicit instructions, such as target project, naming rules or mocking preferences. These take precedence; conflicts with the existing project should be explained in the response.
 
 ## Configuration
 
@@ -237,7 +247,7 @@ All configuration lives under `Tools > Options > AI Studio`:
 - **Commands**
   - Override the system prompt for each command, enforce coding guidelines, or switch to a custom model per command.
 - **Unit Test**
-  - Choose the target test framework, namespace, class name template, and add reusable instructions for deterministic tests.
+  - Configure existing-test discovery, a preferred test project, fallback frameworks and reusable custom instructions.
 
 ## Advanced Customization
 
