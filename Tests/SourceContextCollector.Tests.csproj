@@ -8,6 +8,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" />
     <Compile Include="../Helpers/SourceContextCollector.cs" Link="SourceContextCollector.cs" />
+    <Compile Include="../Helpers/TestGenerationContextCollector.cs" Link="TestGenerationContextCollector.cs" />
+    <Compile Include="TestGenerationContextCollectorTests.cs" />
     <Compile Include="SourceContextCollectorTests.cs" />
   </ItemGroup>
 </Project>
